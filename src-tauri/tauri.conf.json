@@ -1,0 +1,43 @@
+{
+  "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/dev/crates/tauri-config-schema/schema.json",
+  "productName": "Sakura Sky",
+  "version": "1.0.0",
+  "identifier": "com.sakurasky",
+  "bundle": {
+    "active": true,
+    "targets": ["app"],
+    "category": "Utility",
+    "icon": [
+      "icons/icon.icns"
+    ],
+    "macOS": {
+      "infoPlist": "./Info.plist"
+    },
+    "resources": [
+      "icons/icon.png"
+    ]
+  },
+  "build": {
+    "frontendDist": "../src"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "security": {
+      "csp": null
+    },
+    "macOSPrivateApi": true,
+    "windows": [
+      {
+        "label": "main",
+        "url": "index.html",
+        "width": 1920,
+        "height": 1080,
+        "resizable": false,
+        "transparent": true,
+        "decorations": false,
+        "skipTaskbar": true,
+        "alwaysOnTop": true
+      }
+    ]
+  }
+}
