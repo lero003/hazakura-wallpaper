@@ -143,6 +143,29 @@ func rendererProducesVisiblePixelsForEveryMode(_ mode: EffectMode) {
 }
 
 @MainActor
+@Test func sparkRendererReusesRayPathsBetweenFrames() throws {
+    resetSparkRayPathCacheForTesting()
+    let scene = SakuraScene()
+    let size = CGSize(width: 240, height: 160)
+    let bounds = CGRect(origin: .zero, size: size)
+    let context = try #require(makeBitmapContext(size: size))
+    let settings = EffectSettings(mode: .spark, intensity: .play)
+
+    SakuraScene.withDeterministicRandomSeed(42) {
+        scene.resize(to: size)
+    }
+
+    scene.updateAndDraw(in: context, bounds: bounds, time: 1, settings: settings)
+    let firstFrameEntryCount = sparkRayPathCacheEntryCountForTesting()
+    context.clear(bounds)
+    scene.updateAndDraw(in: context, bounds: bounds, time: 1 + (1 / 30), settings: settings)
+    let secondFrameEntryCount = sparkRayPathCacheEntryCountForTesting()
+
+    #expect(firstFrameEntryCount > 0)
+    #expect(secondFrameEntryCount == firstFrameEntryCount)
+}
+
+@MainActor
 @Test func sceneKeepsFixedParticleStorageAcrossLongRenderLoop() throws {
     let scene = SakuraScene()
     let size = CGSize(width: 96, height: 64)

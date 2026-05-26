@@ -4,6 +4,19 @@ import Foundation
 import SakuraSkyCore
 #endif
 
+@MainActor private let maximumSparkRayPathCacheEntries = 512
+@MainActor private var sparkRayPathCache: [String: CGPath] = [:]
+@MainActor private var sparkRayPathCacheOrder: [String] = []
+
+@MainActor func resetSparkRayPathCacheForTesting() {
+    sparkRayPathCache.removeAll(keepingCapacity: true)
+    sparkRayPathCacheOrder.removeAll(keepingCapacity: true)
+}
+
+@MainActor func sparkRayPathCacheEntryCountForTesting() -> Int {
+    sparkRayPathCache.count
+}
+
 @MainActor
 public final class SakuraScene {
     private var boundsSize: CGSize = .zero
@@ -793,7 +806,7 @@ private struct SparkLine {
         }
     }
 
-    func draw(in context: CGContext, time: TimeInterval, settings: EffectSettings) {
+    @MainActor func draw(in context: CGContext, time: TimeInterval, settings: EffectSettings) {
         let twinkle = 0.74 + sin(CGFloat(time) * 5 + phase) * 0.26
         let scale = settings.intensity.sizeScale
         let drawLength = length * scale
@@ -812,13 +825,7 @@ private struct SparkLine {
             context.rotate(by: CGFloat(axis) * CGFloat.pi * 0.5)
             context.setAlpha(drawAlpha * (axis.isMultiple(of: 2) ? 0.52 : 0.34))
             context.setFillColor(cgColor(hue: (hue + 18) / 360, saturation: 1, brightness: 0.94, alpha: 1))
-            let path = CGMutablePath()
-            path.move(to: CGPoint(x: 0, y: -rayWidth))
-            path.addQuadCurve(to: CGPoint(x: rayLength, y: 0), control: CGPoint(x: rayLength * 0.52, y: -rayWidth * 0.4))
-            path.addQuadCurve(to: CGPoint(x: 0, y: rayWidth), control: CGPoint(x: rayLength * 0.52, y: rayWidth * 0.4))
-            path.addQuadCurve(to: .zero, control: CGPoint(x: rayLength * 0.1, y: rayWidth * 0.18))
-            path.addQuadCurve(to: CGPoint(x: 0, y: -rayWidth), control: CGPoint(x: rayLength * 0.1, y: -rayWidth * 0.18))
-            context.addPath(path)
+            context.addPath(cachedSparkRayPath(rayLength: rayLength, rayWidth: rayWidth))
             context.fillPath()
             context.restoreGState()
         }
@@ -840,6 +847,37 @@ private struct SparkLine {
         velocity.dx += dx / distance * force + pointer.velocity.dx * 0.035
         velocity.dy += dy / distance * force + pointer.velocity.dy * 0.035
     }
+}
+
+@MainActor private func cachedSparkRayPath(rayLength: CGFloat, rayWidth: CGFloat) -> CGPath {
+    let key = "\(Double(rayLength).bitPattern):\(Double(rayWidth).bitPattern)"
+    if let cached = sparkRayPathCache[key] {
+        return cached
+    }
+
+    let path = CGMutablePath()
+    path.move(to: CGPoint(x: 0, y: -rayWidth))
+    path.addQuadCurve(
+        to: CGPoint(x: rayLength, y: 0),
+        control: CGPoint(x: rayLength * 0.52, y: -rayWidth * 0.4)
+    )
+    path.addQuadCurve(
+        to: CGPoint(x: 0, y: rayWidth),
+        control: CGPoint(x: rayLength * 0.52, y: rayWidth * 0.4)
+    )
+    path.addQuadCurve(to: .zero, control: CGPoint(x: rayLength * 0.1, y: rayWidth * 0.18))
+    path.addQuadCurve(
+        to: CGPoint(x: 0, y: -rayWidth),
+        control: CGPoint(x: rayLength * 0.1, y: -rayWidth * 0.18)
+    )
+    let immutablePath = path.copy() ?? path
+    sparkRayPathCache[key] = immutablePath
+    sparkRayPathCacheOrder.append(key)
+    while sparkRayPathCacheOrder.count > maximumSparkRayPathCacheEntries {
+        let removedKey = sparkRayPathCacheOrder.removeFirst()
+        sparkRayPathCache.removeValue(forKey: removedKey)
+    }
+    return immutablePath
 }
 
 private struct SakuraTree {

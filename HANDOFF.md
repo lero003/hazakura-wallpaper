@@ -8,6 +8,7 @@
 
 ## Recent Changes
 - Added `npm run renderer:tune` / `scripts/check_renderer_tuning_loop.sh` so glow and particle tuning can run tests, deterministic previews, preview artifact checks, renderer memory smoke, optional app build, and whitespace validation from one command.
+- Cached Spark ray `CGPath` geometry by exact rendered dimensions so repeated Spark frames avoid rebuilding the same ray shapes while preserving particle density and color behavior.
 - Added SwiftPM package targets: public `HazakuraWallpaper` executable product backed by the internal `SakuraSky` app target, plus `SakuraSkyCore` testable core.
 - Added status bar controls for pause, night background, mode, intensity, reset, site, about, and quit.
 - Added explicit status item accessibility label/help and AppKit secure restorable state support for the native menu-bar app.
@@ -146,7 +147,8 @@
 ## Tests
 - `swift build` passed.
 - `swift build -c release` passed.
-- `swift test --disable-sandbox` passed with 35 tests covering core settings persistence, reduce-motion rendering intensity and timer cadence, settings load-source reporting, legacy settings-file import priority, partially invalid night-background migration, legacy settings compatibility, menu behavior, About metadata, public lab-site URL metadata, smoke-exit configuration, overlay timing cadence, overlay window geometry for offset displays, pointer wind/velocity policy, deterministic preview seeding and nested seed restoration, first-render density after resize, legacy orbit timing, and renderer smoke.
+- `swift test --disable-sandbox` passed with 47 tests covering core settings persistence, reduce-motion rendering intensity and timer cadence, settings load-source reporting, legacy settings-file import priority, partially invalid night-background migration, legacy settings compatibility, menu behavior, About metadata, public lab-site URL metadata, smoke-exit configuration, overlay timing cadence, overlay window geometry, pointer wind/velocity policy, deterministic preview seeding and nested seed restoration, first-render density after resize, legacy orbit timing, and renderer smoke.
+- `swift test --disable-sandbox` passed after adding Spark ray path cache coverage that confirms the second Spark play frame reuses the first frame's cached ray paths.
 - `xcodebuild -project SakuraSky.xcodeproj -scheme "Hazakura Wallpaper" -configuration Release -destination 'platform=macOS' -derivedDataPath ./.xcode-derived build CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=` passed.
 - `./scripts/build_app.sh` generated `dist/Hazakura Wallpaper.app` from the Xcode Release product.
 - A pre-held `.build/build_app.lock` makes `./scripts/build_app.sh` exit 1 with a clear concurrent-build message, and a subsequent normal `./scripts/build_app.sh` run succeeds after the lock is removed.
