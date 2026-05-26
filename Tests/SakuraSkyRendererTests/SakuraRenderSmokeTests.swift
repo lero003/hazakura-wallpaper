@@ -70,6 +70,20 @@ func rendererProducesVisiblePixelsForEveryMode(_ mode: EffectMode) {
     #expect(visiblePixels > 9_000)
 }
 
+@Test func glowRenderingUsesProvidedGradientColors() throws {
+    let redPixel = try centerPixelForGlow(colors: [
+        RGBAColor(255, 0, 0, 1).cgColor,
+        RGBAColor(255, 0, 0, 0).cgColor
+    ])
+    let bluePixel = try centerPixelForGlow(colors: [
+        RGBAColor(0, 0, 255, 1).cgColor,
+        RGBAColor(0, 0, 255, 0).cgColor
+    ])
+
+    #expect(redPixel.red > redPixel.blue * 2)
+    #expect(bluePixel.blue > bluePixel.red * 2)
+}
+
 @MainActor
 @Test func firstSmallSakuraRenderKeepsEnoughParticlesInFrame() {
     let visiblePixels = SakuraScene.withDeterministicRandomSeed(42) {
@@ -196,5 +210,39 @@ private func makeBitmapContext(size: CGSize) -> CGContext? {
         bytesPerRow: width * 4,
         space: CGColorSpaceCreateDeviceRGB(),
         bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+    )
+}
+
+private func centerPixelForGlow(colors: [CGColor]) throws -> (red: UInt8, green: UInt8, blue: UInt8, alpha: UInt8) {
+    let size = CGSize(width: 24, height: 24)
+    let width = Int(size.width)
+    let height = Int(size.height)
+    var pixels = [UInt8](repeating: 0, count: width * height * 4)
+    let bytesPerRow = width * 4
+
+    try pixels.withUnsafeMutableBytes { rawBuffer in
+        let context = try #require(CGContext(
+            data: rawBuffer.baseAddress,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: bytesPerRow,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue
+        ))
+        context.drawGlow(
+            center: CGPoint(x: size.width / 2, y: size.height / 2),
+            radius: 10,
+            colors: colors,
+            locations: [0, 1]
+        )
+    }
+
+    let centerIndex = ((height / 2) * bytesPerRow) + (width / 2) * 4
+    return (
+        red: pixels[centerIndex],
+        green: pixels[centerIndex + 1],
+        blue: pixels[centerIndex + 2],
+        alpha: pixels[centerIndex + 3]
     )
 }

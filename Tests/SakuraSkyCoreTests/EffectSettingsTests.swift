@@ -12,10 +12,12 @@ import Testing
     #expect(settings.intensity == .normal)
 }
 
-@Test func particleBudgetIsClampedToAvailableParticles() {
-    #expect(ParticleBudget.visibleCount(total: 100, intensity: .quiet) == 48)
-    #expect(ParticleBudget.visibleCount(total: 100, intensity: .normal) == 100)
-    #expect(ParticleBudget.visibleCount(total: 100, intensity: .play) == 100)
+@Test func particleBudgetScalesFromNormalCountWithinStorageCapacity() {
+    #expect(ParticleBudget.storageCount(baseCount: 100) == 158)
+    #expect(ParticleBudget.visibleCount(baseCount: 100, availableCount: 158, intensity: .quiet) == 48)
+    #expect(ParticleBudget.visibleCount(baseCount: 100, availableCount: 158, intensity: .normal) == 100)
+    #expect(ParticleBudget.visibleCount(baseCount: 100, availableCount: 158, intensity: .play) == 158)
+    #expect(ParticleBudget.visibleCount(baseCount: 100, availableCount: 120, intensity: .play) == 120)
 }
 
 @Test func pauseStateIsNotPersistedAcrossLaunches() throws {

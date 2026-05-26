@@ -18,6 +18,15 @@ public final class SakuraScene {
     private var sparkles: [Sparkle] = []
     private var trees: [SakuraTree] = []
 
+    private enum BaseParticleCount {
+        static let sakura = 122
+        static let hazakura = 124
+        static let breeze = 136
+        static let magic = 180
+        static let firefly = 118
+        static let spark = 108
+    }
+
     public init() {
         reset(size: CGSize(width: 1440, height: 900))
     }
@@ -58,11 +67,32 @@ public final class SakuraScene {
 
         switch settings.mode {
         case .sakura:
-            drawParticles(&sakuraParticles, in: context, bounds: bounds, time: time, settings: settings)
+            drawParticles(
+                &sakuraParticles,
+                baseCount: BaseParticleCount.sakura,
+                in: context,
+                bounds: bounds,
+                time: time,
+                settings: settings
+            )
         case .hazakura:
-            drawParticles(&hazakuraParticles, in: context, bounds: bounds, time: time, settings: settings)
+            drawParticles(
+                &hazakuraParticles,
+                baseCount: BaseParticleCount.hazakura,
+                in: context,
+                bounds: bounds,
+                time: time,
+                settings: settings
+            )
         case .breeze:
-            drawParticles(&breezeParticles, in: context, bounds: bounds, time: time, settings: settings)
+            drawParticles(
+                &breezeParticles,
+                baseCount: BaseParticleCount.breeze,
+                in: context,
+                bounds: bounds,
+                time: time,
+                settings: settings
+            )
         case .magic:
             drawMagic(in: context, bounds: bounds, time: time, settings: settings)
         case .firefly:
@@ -98,24 +128,36 @@ public final class SakuraScene {
         resetGeneration += 1
         boundsSize = size
         let bounds = CGRect(origin: .zero, size: size)
-        sakuraParticles = (0..<122).map { _ in DriftParticle(style: .sakura, initial: true, bounds: bounds) }
-        hazakuraParticles = (0..<124).map { _ in DriftParticle(style: .hazakura, initial: true, bounds: bounds) }
-        breezeParticles = (0..<136).map { _ in DriftParticle(style: .breeze, initial: true, bounds: bounds) }
-        magicLights = (0..<180).map { _ in MagicLight(initial: true, bounds: bounds) }
-        fireflies = (0..<118).map { _ in Firefly(initial: true, bounds: bounds) }
-        sparkLines = (0..<108).map { _ in SparkLine(initial: true, bounds: bounds) }
+        let sakuraCount = ParticleBudget.storageCount(baseCount: BaseParticleCount.sakura)
+        let hazakuraCount = ParticleBudget.storageCount(baseCount: BaseParticleCount.hazakura)
+        let breezeCount = ParticleBudget.storageCount(baseCount: BaseParticleCount.breeze)
+        let magicCount = ParticleBudget.storageCount(baseCount: BaseParticleCount.magic)
+        let fireflyCount = ParticleBudget.storageCount(baseCount: BaseParticleCount.firefly)
+        let sparkCount = ParticleBudget.storageCount(baseCount: BaseParticleCount.spark)
+
+        sakuraParticles = (0..<sakuraCount).map { _ in DriftParticle(style: .sakura, initial: true, bounds: bounds) }
+        hazakuraParticles = (0..<hazakuraCount).map { _ in DriftParticle(style: .hazakura, initial: true, bounds: bounds) }
+        breezeParticles = (0..<breezeCount).map { _ in DriftParticle(style: .breeze, initial: true, bounds: bounds) }
+        magicLights = (0..<magicCount).map { _ in MagicLight(initial: true, bounds: bounds) }
+        fireflies = (0..<fireflyCount).map { _ in Firefly(initial: true, bounds: bounds) }
+        sparkLines = (0..<sparkCount).map { _ in SparkLine(initial: true, bounds: bounds) }
         sparkles = (0..<58).map { _ in Sparkle(initial: true, bounds: bounds) }
         trees = [.init(side: .left), .init(side: .right)]
     }
 
     private func drawParticles(
         _ particles: inout [DriftParticle],
+        baseCount: Int,
         in context: CGContext,
         bounds: CGRect,
         time: TimeInterval,
         settings: EffectSettings
     ) {
-        let visibleCount = ParticleBudget.visibleCount(total: particles.count, intensity: settings.intensity)
+        let visibleCount = ParticleBudget.visibleCount(
+            baseCount: baseCount,
+            availableCount: particles.count,
+            intensity: settings.intensity
+        )
         guard visibleCount > 0 else { return }
 
         for index in 0..<visibleCount {
@@ -125,7 +167,11 @@ public final class SakuraScene {
     }
 
     private func drawMagic(in context: CGContext, bounds: CGRect, time: TimeInterval, settings: EffectSettings) {
-        let visibleCount = ParticleBudget.visibleCount(total: magicLights.count, intensity: settings.intensity)
+        let visibleCount = ParticleBudget.visibleCount(
+            baseCount: BaseParticleCount.magic,
+            availableCount: magicLights.count,
+            intensity: settings.intensity
+        )
         guard visibleCount > 0 else { return }
 
         for index in 0..<visibleCount {
@@ -135,7 +181,11 @@ public final class SakuraScene {
     }
 
     private func drawFireflies(in context: CGContext, bounds: CGRect, time: TimeInterval, settings: EffectSettings) {
-        let visibleCount = ParticleBudget.visibleCount(total: fireflies.count, intensity: settings.intensity)
+        let visibleCount = ParticleBudget.visibleCount(
+            baseCount: BaseParticleCount.firefly,
+            availableCount: fireflies.count,
+            intensity: settings.intensity
+        )
         guard visibleCount > 0 else { return }
 
         for index in 0..<visibleCount {
@@ -145,7 +195,11 @@ public final class SakuraScene {
     }
 
     private func drawSparks(in context: CGContext, bounds: CGRect, time: TimeInterval, settings: EffectSettings) {
-        let visibleCount = ParticleBudget.visibleCount(total: sparkLines.count, intensity: settings.intensity)
+        let visibleCount = ParticleBudget.visibleCount(
+            baseCount: BaseParticleCount.spark,
+            availableCount: sparkLines.count,
+            intensity: settings.intensity
+        )
         guard visibleCount > 0 else { return }
 
         for index in 0..<visibleCount {
@@ -207,12 +261,12 @@ struct SakuraSceneDiagnostics: Equatable {
     static let expectedParticleStorage = SakuraSceneDiagnostics(
         boundsSize: .zero,
         resetGeneration: 0,
-        sakuraParticleCount: 122,
-        hazakuraParticleCount: 124,
-        breezeParticleCount: 136,
-        magicLightCount: 180,
-        fireflyCount: 118,
-        sparkLineCount: 108,
+        sakuraParticleCount: 193,
+        hazakuraParticleCount: 196,
+        breezeParticleCount: 215,
+        magicLightCount: 285,
+        fireflyCount: 187,
+        sparkLineCount: 171,
         sparkleCount: 58,
         treeCount: 2
     )

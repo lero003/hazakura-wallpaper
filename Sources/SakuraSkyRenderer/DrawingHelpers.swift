@@ -3,7 +3,6 @@ import CoreGraphics
 let deviceRGB: CGColorSpace = CGColorSpaceCreateDeviceRGB()
 
 private let petalRenderScale: CGFloat = 128
-private let glowImageSize: Int = 128
 
 @MainActor private let petalPath: CGPath = {
     let w: CGFloat = 0.48
@@ -21,19 +20,6 @@ private let glowImageSize: Int = 128
 
 @MainActor private var petalImageCache: [String: CGImage] = [:]
 @MainActor private var petalGradientCache: [String: CGGradient] = [:]
-
-private let glowImage: CGImage? = {
-    guard let ctx = CGContext(data: nil, width: glowImageSize, height: glowImageSize, bitsPerComponent: 8, bytesPerRow: 0, space: deviceRGB, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return nil }
-    let cx = CGFloat(glowImageSize) / 2
-    let colors: [CGColor] = [
-        RGBAColor(255, 255, 255, 1).cgColor,
-        RGBAColor(255, 255, 255, 0).cgColor
-    ]
-    if let gradient = CGGradient(colorsSpace: deviceRGB, colors: colors as CFArray, locations: [0, 1]) {
-        ctx.drawRadialGradient(gradient, startCenter: CGPoint(x: cx, y: cx), startRadius: 0, endCenter: CGPoint(x: cx, y: cx), endRadius: cx, options: [])
-    }
-    return ctx.makeImage()
-}()
 
 @MainActor private func cachedPetalGradient(color: RGBAColor) -> CGGradient? {
     let key = "\(color.red):\(color.green):\(color.blue)"
@@ -131,16 +117,25 @@ enum SakuraPalette {
 
 extension CGContext {
     func drawGlow(center: CGPoint, radius: CGFloat, colors: [CGColor], locations: [CGFloat]) {
-        guard let firstColor = colors.first, let image = glowImage else { return }
-        let alpha = firstColor.alpha
-        guard alpha > 0.01 else { return }
+        guard radius > 0,
+              !colors.isEmpty,
+              colors.count == locations.count,
+              let gradient = CGGradient(
+                colorsSpace: deviceRGB,
+                colors: colors as CFArray,
+                locations: locations
+              )
+        else { return }
+
         saveGState()
-        translateBy(x: center.x, y: center.y)
-        let s = radius * 2 / CGFloat(glowImageSize)
-        scaleBy(x: s, y: s)
-        setAlpha(alpha * 0.6)
-        let r = CGRect(x: -CGFloat(glowImageSize) / 2, y: -CGFloat(glowImageSize) / 2, width: CGFloat(glowImageSize), height: CGFloat(glowImageSize))
-        draw(image, in: r)
+        drawRadialGradient(
+            gradient,
+            startCenter: center,
+            startRadius: 0,
+            endCenter: center,
+            endRadius: radius,
+            options: []
+        )
         restoreGState()
     }
 
