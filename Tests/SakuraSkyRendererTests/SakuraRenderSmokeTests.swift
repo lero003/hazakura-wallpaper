@@ -70,6 +70,7 @@ func rendererProducesVisiblePixelsForEveryMode(_ mode: EffectMode) {
     #expect(visiblePixels > 9_000)
 }
 
+@MainActor
 @Test func glowRenderingUsesProvidedGradientColors() throws {
     let redPixel = try centerPixelForGlow(colors: [
         RGBAColor(255, 0, 0, 1).cgColor,
@@ -95,6 +96,50 @@ func rendererProducesVisiblePixelsForEveryMode(_ mode: EffectMode) {
     }
 
     #expect(visiblePixels > 300)
+}
+
+@MainActor
+@Test func layerBackedGlowPathIsLimitedToGlowHeavyModes() throws {
+    let size = CGSize(width: 180, height: 120)
+    let bounds = CGRect(origin: .zero, size: size)
+    let context = try #require(makeBitmapContext(size: size))
+
+    let magicSprites = SakuraScene.withDeterministicRandomSeed(42) {
+        let scene = SakuraScene()
+        scene.resize(to: size)
+        return scene.updateAndDrawLayerBacked(
+            in: context,
+            bounds: bounds,
+            time: 1,
+            settings: EffectSettings(mode: .magic, intensity: .normal)
+        )
+    }
+    context.clear(bounds)
+    let fireflySprites = SakuraScene.withDeterministicRandomSeed(42) {
+        let scene = SakuraScene()
+        scene.resize(to: size)
+        return scene.updateAndDrawLayerBacked(
+            in: context,
+            bounds: bounds,
+            time: 1,
+            settings: EffectSettings(mode: .firefly, intensity: .normal)
+        )
+    }
+    context.clear(bounds)
+    let sakuraSprites = SakuraScene.withDeterministicRandomSeed(42) {
+        let scene = SakuraScene()
+        scene.resize(to: size)
+        return scene.updateAndDrawLayerBacked(
+            in: context,
+            bounds: bounds,
+            time: 1,
+            settings: EffectSettings(mode: .sakura, intensity: .normal)
+        )
+    }
+
+    #expect((magicSprites ?? []).count > 0)
+    #expect((fireflySprites ?? []).count > 0)
+    #expect(sakuraSprites == nil)
 }
 
 @MainActor
@@ -213,7 +258,7 @@ private func makeBitmapContext(size: CGSize) -> CGContext? {
     )
 }
 
-private func centerPixelForGlow(colors: [CGColor]) throws -> (red: UInt8, green: UInt8, blue: UInt8, alpha: UInt8) {
+@MainActor private func centerPixelForGlow(colors: [CGColor]) throws -> (red: UInt8, green: UInt8, blue: UInt8, alpha: UInt8) {
     let size = CGSize(width: 24, height: 24)
     let width = Int(size.width)
     let height = Int(size.height)

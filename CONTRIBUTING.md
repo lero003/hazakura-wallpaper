@@ -24,6 +24,14 @@ swift test --disable-sandbox
 
 Use `--disable-sandbox` only when the local automation shell cannot start SwiftPM's sandbox.
 
+Renderer tuning loop:
+
+```sh
+npm run renderer:tune
+```
+
+Use this while adjusting glow, particle compositing, previews, or renderer memory behavior. Add `-- --full` before handoff when the app bundle build should be included in the same pass.
+
 ## Validation Before A Pull Request
 
 Run the focused checks for your change, then run the release candidate gate when touching build, release, rendering, settings, packaging, or docs:

@@ -4,6 +4,7 @@ All notable changes to Hazakura Wallpaper are recorded here.
 
 ## Unreleased
 
+- Added a renderer tuning loop for glow/particle changes that runs tests, deterministic previews, preview artifact checks, renderer memory smoke, optional app build, and whitespace validation from one command.
 - Pending normal-session release evidence before handing a DMG/ZIP to users:
   DMG creation, LaunchServices bundle-open verification, `leaks --atExit`, and human visual QA acceptance.
 

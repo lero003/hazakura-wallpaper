@@ -53,17 +53,7 @@ public final class SakuraScene {
             resize(to: bounds.size)
         }
 
-        drawBackground(context, bounds: bounds, time: time, settings: settings)
-        if settings.showsNightBackground {
-            for tree in trees {
-                tree.draw(in: context, bounds: bounds)
-            }
-        }
-
-        for index in sparkles.indices {
-            sparkles[index].update(time: time, pointer: pointer, bounds: bounds, settings: settings)
-            sparkles[index].draw(in: context, settings: settings)
-        }
+        drawBackdrop(in: context, bounds: bounds, time: time, settings: settings)
 
         switch settings.mode {
         case .sakura:
@@ -99,6 +89,31 @@ public final class SakuraScene {
             drawFireflies(in: context, bounds: bounds, time: time, settings: settings)
         case .spark:
             drawSparks(in: context, bounds: bounds, time: time, settings: settings)
+        }
+    }
+
+    public func updateAndDrawLayerBacked(
+        in context: CGContext,
+        bounds: CGRect,
+        time: TimeInterval,
+        settings: EffectSettings
+    ) -> [SakuraGlowLayerSprite]? {
+        guard Self.isRenderableSize(bounds.size) else { return nil }
+        guard settings.mode == .magic || settings.mode == .firefly else { return nil }
+
+        if bounds.size != boundsSize {
+            resize(to: bounds.size)
+        }
+
+        drawBackdrop(in: context, bounds: bounds, time: time, settings: settings)
+
+        switch settings.mode {
+        case .magic:
+            return updateMagicLayerSprites(bounds: bounds, time: time, settings: settings)
+        case .firefly:
+            return updateFireflyLayerSprites(bounds: bounds, time: time, settings: settings)
+        case .sakura, .hazakura, .breeze, .spark:
+            return nil
         }
     }
 
@@ -166,6 +181,20 @@ public final class SakuraScene {
         }
     }
 
+    private func drawBackdrop(in context: CGContext, bounds: CGRect, time: TimeInterval, settings: EffectSettings) {
+        drawBackground(context, bounds: bounds, time: time, settings: settings)
+        if settings.showsNightBackground {
+            for tree in trees {
+                tree.draw(in: context, bounds: bounds)
+            }
+        }
+
+        for index in sparkles.indices {
+            sparkles[index].update(time: time, pointer: pointer, bounds: bounds, settings: settings)
+            sparkles[index].draw(in: context, settings: settings)
+        }
+    }
+
     private func drawMagic(in context: CGContext, bounds: CGRect, time: TimeInterval, settings: EffectSettings) {
         let visibleCount = ParticleBudget.visibleCount(
             baseCount: BaseParticleCount.magic,
@@ -180,6 +209,27 @@ public final class SakuraScene {
         }
     }
 
+    private func updateMagicLayerSprites(
+        bounds: CGRect,
+        time: TimeInterval,
+        settings: EffectSettings
+    ) -> [SakuraGlowLayerSprite] {
+        let visibleCount = ParticleBudget.visibleCount(
+            baseCount: BaseParticleCount.magic,
+            availableCount: magicLights.count,
+            intensity: settings.intensity
+        )
+        guard visibleCount > 0 else { return [] }
+
+        var sprites: [SakuraGlowLayerSprite] = []
+        sprites.reserveCapacity(visibleCount * 2)
+        for index in 0..<visibleCount {
+            magicLights[index].update(time: time, pointer: pointer, bounds: bounds, settings: settings)
+            sprites.append(contentsOf: magicLights[index].layerSprites(time: time, settings: settings))
+        }
+        return sprites
+    }
+
     private func drawFireflies(in context: CGContext, bounds: CGRect, time: TimeInterval, settings: EffectSettings) {
         let visibleCount = ParticleBudget.visibleCount(
             baseCount: BaseParticleCount.firefly,
@@ -192,6 +242,27 @@ public final class SakuraScene {
             fireflies[index].update(time: time, pointer: pointer, bounds: bounds, settings: settings)
             fireflies[index].draw(in: context, time: time, settings: settings)
         }
+    }
+
+    private func updateFireflyLayerSprites(
+        bounds: CGRect,
+        time: TimeInterval,
+        settings: EffectSettings
+    ) -> [SakuraGlowLayerSprite] {
+        let visibleCount = ParticleBudget.visibleCount(
+            baseCount: BaseParticleCount.firefly,
+            availableCount: fireflies.count,
+            intensity: settings.intensity
+        )
+        guard visibleCount > 0 else { return [] }
+
+        var sprites: [SakuraGlowLayerSprite] = []
+        sprites.reserveCapacity(visibleCount * 2)
+        for index in 0..<visibleCount {
+            fireflies[index].update(time: time, pointer: pointer, bounds: bounds, settings: settings)
+            sprites.append(contentsOf: fireflies[index].layerSprites(time: time, settings: settings))
+        }
+        return sprites
     }
 
     private func drawSparks(in context: CGContext, bounds: CGRect, time: TimeInterval, settings: EffectSettings) {
@@ -528,7 +599,21 @@ private struct MagicLight {
         }
     }
 
-    func draw(in context: CGContext, time: TimeInterval, settings: EffectSettings) {
+    @MainActor func draw(in context: CGContext, time: TimeInterval, settings: EffectSettings) {
+        let sprites = layerSprites(time: time, settings: settings)
+
+        context.saveGState()
+        context.setBlendMode(.plusLighter)
+        for sprite in sprites {
+            context.saveGState()
+            context.setAlpha(sprite.opacity)
+            context.draw(sprite.image, in: sprite.frame)
+            context.restoreGState()
+        }
+        context.restoreGState()
+    }
+
+    @MainActor func layerSprites(time: TimeInterval, settings: EffectSettings) -> [SakuraGlowLayerSprite] {
         let twinkle = 0.72 + sin(CGFloat(time) * 4 + phase) * 0.28
         let drawAlpha = alpha * twinkle * settings.intensity.alphaScale
         let orbitPhase = AnimationClock.legacyOrbitPhase(time: time, orbitSpeed: orbitSpeed, phase: phase)
@@ -538,32 +623,29 @@ private struct MagicLight {
         )
         let drawSize = size * settings.intensity.sizeScale
 
-        context.saveGState()
-        context.setBlendMode(.plusLighter)
-        context.setAlpha(drawAlpha)
         let outerColors = [
-            cgColor(hue: hue / 360, saturation: 0.96, brightness: 0.88, alpha: 0.34),
-            cgColor(hue: (hue + 24) / 360, saturation: 0.92, brightness: 0.72, alpha: 0.11),
+            cgColor(hue: hue / 360, saturation: 0.96, brightness: 0.88, alpha: 0.34 * drawAlpha),
+            cgColor(hue: (hue + 24) / 360, saturation: 0.92, brightness: 0.72, alpha: 0.11 * drawAlpha),
             cgColor(hue: hue / 360, saturation: 0.96, brightness: 0.6, alpha: 0)
         ]
-        context.drawGlow(
+        let outer = makeGlowLayerSprite(
             center: point,
             radius: drawSize * 5.2,
             colors: outerColors,
             locations: [0, 0.42, 1]
         )
         let innerColors = [
-            cgColor(hue: (hue + 8) / 360, saturation: 1, brightness: 0.94, alpha: 0.68),
-            cgColor(hue: hue / 360, saturation: 1, brightness: 0.82, alpha: 0.22),
+            cgColor(hue: (hue + 8) / 360, saturation: 1, brightness: 0.94, alpha: 0.68 * drawAlpha),
+            cgColor(hue: hue / 360, saturation: 1, brightness: 0.82, alpha: 0.22 * drawAlpha),
             cgColor(hue: hue / 360, saturation: 1, brightness: 0.7, alpha: 0)
         ]
-        context.drawGlow(
+        let inner = makeGlowLayerSprite(
             center: point,
             radius: drawSize * 1.7,
             colors: innerColors,
             locations: [0, 0.62, 1]
         )
-        context.restoreGState()
+        return [outer, inner].compactMap { $0 }
     }
 
     private mutating func applyRepel(pointer: PointerMotionState, radius: CGFloat, strength: CGFloat, settings: EffectSettings) {
@@ -615,15 +697,27 @@ private struct Firefly {
         }
     }
 
-    func draw(in context: CGContext, time: TimeInterval, settings: EffectSettings) {
+    @MainActor func draw(in context: CGContext, time: TimeInterval, settings: EffectSettings) {
+        let sprites = layerSprites(time: time, settings: settings)
+
+        context.saveGState()
+        context.setBlendMode(.plusLighter)
+        for sprite in sprites {
+            context.saveGState()
+            context.setAlpha(sprite.opacity)
+            context.draw(sprite.image, in: sprite.frame)
+            context.restoreGState()
+        }
+        context.restoreGState()
+    }
+
+    @MainActor func layerSprites(time: TimeInterval, settings: EffectSettings) -> [SakuraGlowLayerSprite] {
         let twinkle = max(0.18, 0.66 + sin(CGFloat(time) * 3.4 + phase) * 0.34)
         let drawAlpha = alpha * twinkle * settings.intensity.alphaScale
         let drawSize = size * settings.intensity.sizeScale
         let point = CGPoint(x: x, y: y)
 
-        context.saveGState()
-        context.setBlendMode(.plusLighter)
-        context.drawGlow(
+        let outer = makeGlowLayerSprite(
             center: point,
             radius: drawSize * 7.2,
             colors: [
@@ -633,7 +727,7 @@ private struct Firefly {
             ],
             locations: [0, 0.45, 1]
         )
-        context.drawGlow(
+        let inner = makeGlowLayerSprite(
             center: point,
             radius: drawSize * 2.1,
             colors: [
@@ -643,7 +737,7 @@ private struct Firefly {
             ],
             locations: [0, 0.58, 1]
         )
-        context.restoreGState()
+        return [outer, inner].compactMap { $0 }
     }
 
     private mutating func applyRepel(pointer: PointerMotionState, radius: CGFloat, strength: CGFloat, settings: EffectSettings) {
@@ -796,7 +890,7 @@ private struct SakuraTree {
         }
     }
 
-    func draw(in context: CGContext, bounds: CGRect) {
+    @MainActor func draw(in context: CGContext, bounds: CGRect) {
         let baseX = side == .left ? -34 : bounds.width + 34
         let direction: CGFloat = side == .left ? 1 : -1
 

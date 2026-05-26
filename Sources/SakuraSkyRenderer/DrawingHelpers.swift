@@ -3,6 +3,8 @@ import CoreGraphics
 let deviceRGB: CGColorSpace = CGColorSpaceCreateDeviceRGB()
 
 private let petalRenderScale: CGFloat = 128
+private let glowRenderScale: CGFloat = 128
+private let maximumGlowCacheEntries = 96
 
 @MainActor private let petalPath: CGPath = {
     let w: CGFloat = 0.48
@@ -20,6 +22,14 @@ private let petalRenderScale: CGFloat = 128
 
 @MainActor private var petalImageCache: [String: CGImage] = [:]
 @MainActor private var petalGradientCache: [String: CGGradient] = [:]
+@MainActor private var glowImageCache: [String: CGImage] = [:]
+@MainActor private var glowImageCacheOrder: [String] = []
+
+public struct SakuraGlowLayerSprite {
+    public let image: CGImage
+    public let opacity: CGFloat
+    public let frame: CGRect
+}
 
 @MainActor private func cachedPetalGradient(color: RGBAColor) -> CGGradient? {
     let key = "\(color.red):\(color.green):\(color.blue)"
@@ -116,26 +126,27 @@ enum SakuraPalette {
 }
 
 extension CGContext {
-    func drawGlow(center: CGPoint, radius: CGFloat, colors: [CGColor], locations: [CGFloat]) {
-        guard radius > 0,
-              !colors.isEmpty,
-              colors.count == locations.count,
-              let gradient = CGGradient(
-                colorsSpace: deviceRGB,
-                colors: colors as CFArray,
-                locations: locations
-              )
+    @MainActor func drawGlow(center: CGPoint, radius: CGFloat, colors: [CGColor], locations: [CGFloat]) {
+        guard let sprite = makeGlowLayerSprite(
+            center: center,
+            radius: radius,
+            colors: colors,
+            locations: locations
+        )
         else { return }
 
         saveGState()
-        drawRadialGradient(
-            gradient,
-            startCenter: center,
-            startRadius: 0,
-            endCenter: center,
-            endRadius: radius,
-            options: []
+        translateBy(x: sprite.frame.midX, y: sprite.frame.midY)
+        let drawScale = sprite.frame.width / glowRenderScale
+        scaleBy(x: drawScale, y: drawScale)
+        setAlpha(sprite.opacity)
+        let rect = CGRect(
+            x: -glowRenderScale / 2,
+            y: -glowRenderScale / 2,
+            width: glowRenderScale,
+            height: glowRenderScale
         )
+        draw(sprite.image, in: rect)
         restoreGState()
     }
 
@@ -150,6 +161,158 @@ extension CGContext {
         let r = CGRect(x: -petalRenderScale / 2, y: -petalRenderScale / 2, width: petalRenderScale, height: petalRenderScale)
         draw(image, in: r)
         restoreGState()
+    }
+}
+
+@MainActor public func makeGlowLayerSprite(
+    center: CGPoint,
+    radius: CGFloat,
+    colors: [CGColor],
+    locations: [CGFloat]
+) -> SakuraGlowLayerSprite? {
+    let opacity = glowOpacity(for: colors)
+    guard radius > 0,
+          opacity > 0.01,
+          !colors.isEmpty,
+          colors.count == locations.count,
+          let image = cachedGlowImage(colors: normalizedGlowColors(colors, opacity: opacity), locations: locations)
+    else { return nil }
+
+    let diameter = radius * 2
+    return SakuraGlowLayerSprite(
+        image: image,
+        opacity: opacity,
+        frame: CGRect(
+            x: center.x - radius,
+            y: center.y - radius,
+            width: diameter,
+            height: diameter
+        )
+    )
+}
+
+@MainActor private func cachedGlowImage(colors: [CGColor], locations: [CGFloat]) -> CGImage? {
+    let key = glowCacheKey(colors: colors, locations: locations)
+    if let cached = glowImageCache[key] {
+        return cached
+    }
+
+    guard let image = makeGlowImage(colors: colors, locations: locations) else {
+        return nil
+    }
+
+    glowImageCache[key] = image
+    glowImageCacheOrder.append(key)
+    while glowImageCacheOrder.count > maximumGlowCacheEntries {
+        let removedKey = glowImageCacheOrder.removeFirst()
+        glowImageCache.removeValue(forKey: removedKey)
+    }
+    return image
+}
+
+private func makeGlowImage(colors: [CGColor], locations: [CGFloat]) -> CGImage? {
+    let size = Int(glowRenderScale)
+    guard let context = CGContext(
+        data: nil,
+        width: size,
+        height: size,
+        bitsPerComponent: 8,
+        bytesPerRow: size * 4,
+        space: deviceRGB,
+        bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+    ),
+          let gradient = CGGradient(
+            colorsSpace: deviceRGB,
+            colors: colors as CFArray,
+            locations: locations
+          )
+    else { return nil }
+
+    let center = CGPoint(x: glowRenderScale / 2, y: glowRenderScale / 2)
+    context.drawRadialGradient(
+        gradient,
+        startCenter: center,
+        startRadius: 0,
+        endCenter: center,
+        endRadius: glowRenderScale / 2,
+        options: []
+    )
+    return context.makeImage()
+}
+
+private func glowCacheKey(colors: [CGColor], locations: [CGFloat]) -> String {
+    zip(colors, locations)
+        .map { color, location in
+            let rgba = quantizedRGBAComponents(for: color)
+            let stop = Int((location * 1_000).rounded())
+            return "\(stop):\(rgba.red):\(rgba.green):\(rgba.blue):\(rgba.alpha)"
+        }
+        .joined(separator: "|")
+}
+
+private func quantizedRGBAComponents(for color: CGColor) -> (red: Int, green: Int, blue: Int, alpha: Int) {
+    let converted = color.converted(to: deviceRGB, intent: .defaultIntent, options: nil) ?? color
+    let components = converted.components ?? []
+    let red: CGFloat
+    let green: CGFloat
+    let blue: CGFloat
+
+    if components.count >= 3 {
+        red = components[0]
+        green = components[1]
+        blue = components[2]
+    } else {
+        let gray = components.first ?? 0
+        red = gray
+        green = gray
+        blue = gray
+    }
+
+    return (
+        red: quantizedColorComponent(red),
+        green: quantizedColorComponent(green),
+        blue: quantizedColorComponent(blue),
+        alpha: quantizedColorComponent(color.alpha)
+    )
+}
+
+private func quantizedColorComponent(_ value: CGFloat) -> Int {
+    let clamped = min(1, max(0, value))
+    return Int((clamped * 255 / 8).rounded()) * 8
+}
+
+private func glowOpacity(for colors: [CGColor]) -> CGFloat {
+    colors.reduce(CGFloat.zero) { opacity, color in
+        max(opacity, color.alpha)
+    }
+}
+
+private func normalizedGlowColors(_ colors: [CGColor], opacity: CGFloat) -> [CGColor] {
+    guard opacity > 0 else { return colors }
+    return colors.map { color in
+        let converted = color.converted(to: deviceRGB, intent: .defaultIntent, options: nil) ?? color
+        let components = converted.components ?? []
+        let red: CGFloat
+        let green: CGFloat
+        let blue: CGFloat
+
+        if components.count >= 3 {
+            red = components[0]
+            green = components[1]
+            blue = components[2]
+        } else {
+            let gray = components.first ?? 0
+            red = gray
+            green = gray
+            blue = gray
+        }
+
+        return CGColor(
+            red: min(1, max(0, red)),
+            green: min(1, max(0, green)),
+            blue: min(1, max(0, blue)),
+            alpha: min(1, max(0, color.alpha / opacity))
+        )
     }
 }
 

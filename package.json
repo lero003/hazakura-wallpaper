@@ -6,6 +6,7 @@
     "build": "./scripts/build_app.sh",
     "dev": "./script/build_and_run.sh",
     "preview": "./scripts/render_previews.sh",
+    "renderer:tune": "./scripts/check_renderer_tuning_loop.sh",
     "verify": "./scripts/verify_release.sh",
     "release:candidate": "./scripts/prepare_release_candidate.sh",
     "share:preflight": "./scripts/check_unsigned_share_prerequisites.sh",

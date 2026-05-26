@@ -84,6 +84,17 @@ This includes single-mode previews plus `qa-matrix-day.png` and `qa-matrix-night
 Preview rendering uses a fixed seed so release QA images are reproducible unless renderer or preview logic intentionally changes.
 The release gate validates these PNGs, their expected dimensions, and their deterministic checksums before packaging.
 
+Run the renderer tuning loop while adjusting glow or particle rendering:
+
+```sh
+npm run renderer:tune
+```
+
+The same loop is available as `./scripts/check_renderer_tuning_loop.sh`.
+It runs Swift tests, preview rendering, preview artifact checks, preview determinism, renderer memory smoke, and `git diff --check`.
+Pass `--full` when the change also needs to prove `dist/Hazakura Wallpaper.app` still builds.
+The memory smoke portion accepts `HAZAKURA_WALLPAPER_MEMORY_SMOKE_FRAMES`, `HAZAKURA_WALLPAPER_MEMORY_SMOKE_WIDTH`, `HAZAKURA_WALLPAPER_MEMORY_SMOKE_HEIGHT`, and `HAZAKURA_WALLPAPER_MEMORY_SMOKE_MAX_RSS_BYTES` for heavier local performance passes.
+
 Run the release verification gate:
 
 ```sh
