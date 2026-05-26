@@ -1,16 +1,16 @@
 {
-  "name": "sakura-sky",
+  "name": "hazakura-wallpaper",
   "version": "1.0.0",
-  "description": "Sakura falling desktop screensaver",
+  "description": "Native macOS desktop overlay with drifting sakura effects",
   "scripts": {
-    "tauri": "tauri",
-    "dev": "tauri dev",
-    "build": "tauri build"
-  },
-  "devDependencies": {
-    "@tauri-apps/cli": "^2.0.0"
-  },
-  "dependencies": {
-    "@tauri-apps/api": "^2.0.0"
+    "build": "./scripts/build_app.sh",
+    "dev": "./script/build_and_run.sh",
+    "preview": "./scripts/render_previews.sh",
+    "verify": "./scripts/verify_release.sh",
+    "release:candidate": "./scripts/prepare_release_candidate.sh",
+    "share:preflight": "./scripts/check_unsigned_share_prerequisites.sh",
+    "share:preflight:strict": "./scripts/check_unsigned_share_prerequisites.sh --strict-normal-session",
+    "share:check": "./scripts/check_share_readiness.sh",
+    "share:unsigned": "./scripts/finalize_unsigned_share.sh"
   }
 }

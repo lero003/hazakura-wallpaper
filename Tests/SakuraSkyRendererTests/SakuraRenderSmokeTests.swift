@@ -1,0 +1,200 @@
+import CoreGraphics
+import Foundation
+import SakuraSkyCore
+@testable import SakuraSkyRenderer
+import Testing
+
+@MainActor
+@Test(arguments: EffectMode.allCases)
+func rendererProducesVisiblePixelsForEveryMode(_ mode: EffectMode) {
+    let visiblePixels = SakuraRenderSmoke.nonTransparentPixelCount(mode: mode)
+
+    #expect(visiblePixels > 0)
+}
+
+@MainActor
+@Test func deterministicSceneSeedProducesStableRenderSmoke() {
+    let first = SakuraScene.withDeterministicRandomSeed(42) {
+        SakuraRenderSmoke.nonTransparentPixelCount(
+            mode: .hazakura,
+            intensity: .play,
+            showsNightBackground: true
+        )
+    }
+    let second = SakuraScene.withDeterministicRandomSeed(42) {
+        SakuraRenderSmoke.nonTransparentPixelCount(
+            mode: .hazakura,
+            intensity: .play,
+            showsNightBackground: true
+        )
+    }
+
+    #expect(first > 0)
+    #expect(first == second)
+}
+
+@MainActor
+@Test func deterministicRandomSeedRestoresOuterScopeAfterNesting() {
+    let control = SakuraScene.withDeterministicRandomSeed(7) {
+        (
+            Random.double(0...1),
+            Random.double(0...1)
+        )
+    }
+    let nested = SakuraScene.withDeterministicRandomSeed(7) {
+        let first = Random.double(0...1)
+        _ = SakuraScene.withDeterministicRandomSeed(99) {
+            (
+                Random.double(0...1),
+                Random.double(0...1)
+            )
+        }
+        return (
+            first,
+            Random.double(0...1)
+        )
+    }
+
+    #expect(control.0 == nested.0)
+    #expect(control.1 == nested.1)
+}
+
+@MainActor
+@Test func nightBackgroundProducesDenseCoverage() {
+    let visiblePixels = SakuraRenderSmoke.nonTransparentPixelCount(
+        mode: .sakura,
+        showsNightBackground: true,
+        size: CGSize(width: 120, height: 90)
+    )
+
+    #expect(visiblePixels > 9_000)
+}
+
+@MainActor
+@Test func firstSmallSakuraRenderKeepsEnoughParticlesInFrame() {
+    let visiblePixels = SakuraScene.withDeterministicRandomSeed(42) {
+        SakuraRenderSmoke.nonTransparentPixelCount(
+            mode: .sakura,
+            intensity: .normal,
+            size: CGSize(width: 180, height: 120)
+        )
+    }
+
+    #expect(visiblePixels > 300)
+}
+
+@MainActor
+@Test func sceneKeepsFixedParticleStorageAcrossLongRenderLoop() throws {
+    let scene = SakuraScene()
+    let size = CGSize(width: 96, height: 64)
+    let bounds = CGRect(origin: .zero, size: size)
+    let context = try #require(makeBitmapContext(size: size))
+
+    scene.resize(to: size)
+    let diagnosticsAfterResize = scene.diagnostics
+
+    for frame in 0..<360 {
+        let mode = EffectMode.allCases[frame % EffectMode.allCases.count]
+        let settings = EffectSettings(
+            showsNightBackground: frame.isMultiple(of: 2),
+            mode: mode,
+            intensity: frame.isMultiple(of: 3) ? .play : .normal
+        )
+        scene.updatePointer(
+            CGPoint(
+                x: CGFloat(frame % Int(size.width)),
+                y: CGFloat((frame * 7) % Int(size.height))
+            ),
+            isActive: !frame.isMultiple(of: 5),
+            bounds: bounds
+        )
+        context.clear(bounds)
+        scene.updateAndDraw(
+            in: context,
+            bounds: bounds,
+            time: TimeInterval(frame) / 30.0,
+            settings: settings
+        )
+    }
+
+    #expect(scene.diagnostics.matchesExpectedParticleStorage)
+    #expect(scene.diagnostics == diagnosticsAfterResize)
+}
+
+@MainActor
+@Test func sceneIgnoresInvalidResizeWithoutResettingParticleStorage() {
+    let scene = SakuraScene()
+    scene.resize(to: CGSize(width: 120, height: 80))
+    let validDiagnostics = scene.diagnostics
+
+    scene.resize(to: .zero)
+    scene.resize(to: CGSize(width: -1, height: 80))
+    scene.resize(to: CGSize(width: 120, height: -1))
+
+    #expect(scene.diagnostics == validDiagnostics)
+    #expect(scene.diagnostics.matchesExpectedParticleStorage)
+}
+
+@MainActor
+@Test func sceneIgnoresInvalidDrawBoundsWithoutMutatingStorage() throws {
+    let scene = SakuraScene()
+    let size = CGSize(width: 120, height: 80)
+    let context = try #require(makeBitmapContext(size: size))
+
+    scene.resize(to: size)
+    let validDiagnostics = scene.diagnostics
+    let invalidBounds = [
+        CGRect(x: 0, y: 0, width: 0, height: 80),
+        CGRect(x: 0, y: 0, width: 120, height: 0),
+        CGRect(x: 0, y: 0, width: -1, height: 80),
+        CGRect(x: 0, y: 0, width: 120, height: -1),
+        CGRect(x: 0, y: 0, width: CGFloat.infinity, height: 80),
+        CGRect(x: 0, y: 0, width: 120, height: CGFloat.nan)
+    ]
+
+    for bounds in invalidBounds {
+        scene.updatePointer(
+            CGPoint(x: bounds.midX, y: bounds.midY),
+            isActive: true,
+            bounds: bounds
+        )
+        scene.updateAndDraw(
+            in: context,
+            bounds: bounds,
+            time: 1,
+            settings: EffectSettings(mode: .hazakura, intensity: .play)
+        )
+    }
+
+    #expect(scene.diagnostics == validDiagnostics)
+    #expect(scene.diagnostics.matchesExpectedParticleStorage)
+}
+
+@Test func legacyOrbitPhaseUsesRequestAnimationFrameMilliseconds() {
+    let phase = AnimationClock.legacyOrbitPhase(time: 2.5, orbitSpeed: 0.002, phase: 0.4)
+    let verticalPhase = AnimationClock.legacyOrbitPhase(
+        time: 2.5,
+        orbitSpeed: 0.002,
+        speedMultiplier: 0.82,
+        phase: 0.4
+    )
+
+    #expect(abs(phase - 5.4) < 0.000_001)
+    #expect(abs(verticalPhase - 4.5) < 0.000_001)
+}
+
+private func makeBitmapContext(size: CGSize) -> CGContext? {
+    let width = Int(size.width.rounded(.down))
+    let height = Int(size.height.rounded(.down))
+    guard width > 0, height > 0 else { return nil }
+
+    return CGContext(
+        data: nil,
+        width: width,
+        height: height,
+        bitsPerComponent: 8,
+        bytesPerRow: width * 4,
+        space: CGColorSpaceCreateDeviceRGB(),
+        bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+    )
+}

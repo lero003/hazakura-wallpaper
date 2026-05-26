@@ -23,21 +23,21 @@ final class SakuraCanvasView: NSView {
     init(frame: NSRect, settings: EffectSettings) {
         self.settings = settings
         super.init(frame: frame)
-        wantsLayer = true
-        layer?.isOpaque = false
         observeAccessibilityDisplayOptions()
-        if settings.shouldAnimateOverlay {
-            startDisplayTimer()
-        }
+        updateDisplayTimer()
     }
 
     required init?(coder: NSCoder) {
         self.settings = .default
         super.init(coder: coder)
-        wantsLayer = true
-        layer?.isOpaque = false
         observeAccessibilityDisplayOptions()
-        startDisplayTimer()
+        updateDisplayTimer()
+    }
+
+    deinit {
+        MainActor.assumeIsolated {
+            prepareForClose()
+        }
     }
 
     func apply(settings: EffectSettings) {
@@ -49,9 +49,9 @@ final class SakuraCanvasView: NSView {
             stopDisplayTimer()
         } else if !settings.isPaused, wasPaused {
             startTime = CACurrentMediaTime() - pausedAt
-            startDisplayTimer()
         }
 
+        updateDisplayTimer()
         needsDisplay = true
     }
 
@@ -63,6 +63,11 @@ final class SakuraCanvasView: NSView {
         displayTimer?.invalidate()
         displayTimer = nil
         displayTimerInterval = nil
+    }
+
+    func prepareForClose() {
+        stopDisplayTimer()
+        stopObservingAccessibilityDisplayOptions()
     }
 
     override func viewDidMoveToWindow() {
@@ -101,11 +106,22 @@ final class SakuraCanvasView: NSView {
         guard displayTimer == nil || displayTimerInterval != interval else { return }
         stopDisplayTimer()
         let timer = Timer(timeInterval: interval, repeats: true) { [weak self] _ in
-            self?.needsDisplay = true
+            Task { @MainActor in
+                self?.needsDisplay = true
+            }
         }
         RunLoop.main.add(timer, forMode: .common)
         displayTimer = timer
         displayTimerInterval = interval
+    }
+
+    private func updateDisplayTimer() {
+        guard settings.shouldAnimateOverlay else {
+            stopDisplayTimer()
+            return
+        }
+
+        startDisplayTimer()
     }
 
     private func observeAccessibilityDisplayOptions() {
@@ -131,9 +147,7 @@ final class SakuraCanvasView: NSView {
 
     @objc private func accessibilityDisplayOptionsChanged() {
         reducesMotion = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
-        if settings.shouldAnimateOverlay {
-            startDisplayTimer()
-        }
+        updateDisplayTimer()
         needsDisplay = true
     }
 }

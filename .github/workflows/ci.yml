@@ -1,0 +1,114 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release-candidate:
+    name: Release candidate
+    runs-on: macos-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+          npm --version
+
+      - name: Check scripts and public source hygiene
+        run: |
+          bash -n scripts/*.sh script/build_and_run.sh
+          ./scripts/check_script_executable_bits.sh
+          ./scripts/check_text_normalization.sh
+          ./scripts/check_legacy_tauri_boundary.sh
+          ./scripts/check_public_repository_docs.sh
+          ./scripts/check_public_source_hygiene.sh
+          ./scripts/check_public_git_history_hygiene.sh
+          ./scripts/check_privacy_security_boundaries.sh
+
+      - name: Build release candidate
+        run: npm run release:candidate
+
+      - name: Check unsigned publish readiness
+        run: ./scripts/check_publish_readiness.sh
+
+      - name: Package unsigned DMG
+        run: HAZAKURA_WALLPAPER_PACKAGE_EXISTING_APP=1 ./scripts/package_dmg.sh
+
+      - name: Check GitHub release draft after DMG packaging
+        run: ./scripts/check_github_release_notes.sh
+
+      - name: Check public artifact hygiene
+        run: ./scripts/check_public_artifact_hygiene.sh
+
+      - name: Check strict unsigned share preflight
+        run: npm run share:preflight:strict
+
+      - name: Confirm share gate waits for normal-session evidence
+        run: |
+          set +e
+          output="$(./scripts/check_share_readiness.sh 2>&1)"
+          rc=$?
+          set -e
+          printf '%s\n' "$output"
+          if [[ "$rc" -eq 0 ]]; then
+            echo "::error::share readiness passed without required normal-session evidence"
+            exit 1
+          fi
+          if ! grep -Fq "Share readiness failed: the artifact is not ready to hand to users yet." <<<"$output"; then
+            echo "::error::share readiness failed for an unexpected reason"
+            exit 1
+          fi
+          if grep -Fq "DMG artifact:" <<<"$output" || grep -Fq "DMG evidence:" <<<"$output"; then
+            echo "::error::share readiness still reports missing DMG output after CI DMG packaging"
+            exit 1
+          fi
+          for expected in \
+            "normal-session bundle-open evidence" \
+            "human visual QA evidence" \
+            "normal-session leaks memory evidence"
+          do
+            if ! grep -Fq "$expected" <<<"$output"; then
+              echo "::error::share readiness did not report expected remaining normal-session evidence: $expected"
+              exit 1
+            fi
+          done
+
+      - name: Upload release candidate evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: hazakura-wallpaper-release-candidate
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            dist/Hazakura Wallpaper.zip
+            dist/Hazakura Wallpaper.dmg
+            dist/SHA256SUMS
+            dist/release-evidence/GITHUB_RELEASE_DRAFT.md
+            dist/release-evidence/RELEASE_MANIFEST.md
+            dist/release-evidence/dmg-info.txt
+            dist/release-evidence/entitlements.plist
+            dist/release-evidence/preview-artifacts.txt
+            dist/release-evidence/preview-determinism.txt
+            dist/release-evidence/release-evidence-check.txt
+            dist/release-evidence/release-evidence-guard-tests.txt
+            dist/release-evidence/renderer-memory-smoke.txt
+            dist/release-evidence/zip-contents.txt
+            dist/previews/**

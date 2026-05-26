@@ -94,7 +94,7 @@ fn open_lab_site() {
 }
 
 fn show_about_dialog() {
-    let message = "display dialog \"Sakura Sky\\n\\n葉桜ラボ - とことんAIで遊ぶ研究所\\nAIで遊ぶ、小さなデスクトップ演出アプリです。\\n\\n未署名配布版のため、環境によって起動に追加操作が必要な場合があります。\" buttons {\"OK\"} default button \"OK\" with title \"Sakura Sky\"";
+    let message = "display dialog \"Hazakura Wallpaper\\n\\n葉桜ラボ - とことんAIで遊ぶ研究所\\nAIで遊ぶ、小さなデスクトップ演出アプリです。\\n\\n未署名配布版のため、環境によって起動に追加操作が必要な場合があります。\" buttons {\"OK\"} default button \"OK\" with title \"Hazakura Wallpaper\"";
     Command::new("osascript").args(["-e", message]).spawn().ok();
 }
 
@@ -240,7 +240,7 @@ fn create_tray(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     let _tray = TrayIconBuilder::new()
         .menu(&menu)
         .icon(image)
-        .tooltip("Sakura Sky by 葉桜ラボ - とことんAIで遊ぶ研究所")
+        .tooltip("Hazakura Wallpaper by 葉桜ラボ - とことんAIで遊ぶ研究所")
         .build(app)?;
 
     let app_handle2 = app_handle.clone();

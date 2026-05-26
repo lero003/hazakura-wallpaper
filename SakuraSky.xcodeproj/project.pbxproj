@@ -1,0 +1,444 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		100000000000000000000001 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000001 /* AppDelegate.swift */; };
+		100000000000000000000017 /* AppLoggers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000019 /* AppLoggers.swift */; };
+		100000000000000000000002 /* IconLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000002 /* IconLoader.swift */; };
+		100000000000000000000003 /* OverlayController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000003 /* OverlayController.swift */; };
+		100000000000000000000004 /* SakuraCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000004 /* SakuraCanvasView.swift */; };
+		100000000000000000000005 /* SakuraOverlayWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000005 /* SakuraOverlayWindow.swift */; };
+		100000000000000000000006 /* SakuraSkyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000006 /* SakuraSkyApp.swift */; };
+		100000000000000000000007 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000007 /* SettingsStore.swift */; };
+		100000000000000000000008 /* StatusBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000008 /* StatusBarController.swift */; };
+		100000000000000000000009 /* DisplayScale.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000009 /* DisplayScale.swift */; };
+		10000000000000000000000A /* EffectSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000A /* EffectSettings.swift */; };
+		10000000000000000000000B /* DrawingHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000B /* DrawingHelpers.swift */; };
+		10000000000000000000000C /* Random.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000C /* Random.swift */; };
+		10000000000000000000000D /* SakuraScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000D /* SakuraScene.swift */; };
+		100000000000000000000010 /* EffectSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000012 /* EffectSettingsStore.swift */; };
+		100000000000000000000011 /* EffectSettingsCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000013 /* EffectSettingsCommand.swift */; };
+		100000000000000000000012 /* EffectSettingsMenuState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000014 /* EffectSettingsMenuState.swift */; };
+		100000000000000000000013 /* SmokeExitConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000015 /* SmokeExitConfiguration.swift */; };
+		100000000000000000000014 /* OverlayTimingConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000016 /* OverlayTimingConfiguration.swift */; };
+		100000000000000000000018 /* OverlayWindowGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000001A /* OverlayWindowGeometry.swift */; };
+		10000000000000000000001A /* OverlayScreenIdentityTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000001C /* OverlayScreenIdentityTracker.swift */; };
+		100000000000000000000015 /* AppAboutInformation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000017 /* AppAboutInformation.swift */; };
+		100000000000000000000019 /* AppExternalLinks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000001B /* AppExternalLinks.swift */; };
+		100000000000000000000016 /* PointerMotionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000018 /* PointerMotionState.swift */; };
+		10000000000000000000000E /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000E /* icon.icns */; };
+		10000000000000000000000F /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000F /* icon.png */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		200000000000000000000001 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		200000000000000000000019 /* AppLoggers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLoggers.swift; sourceTree = "<group>"; };
+		200000000000000000000002 /* IconLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconLoader.swift; sourceTree = "<group>"; };
+		200000000000000000000003 /* OverlayController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayController.swift; sourceTree = "<group>"; };
+		200000000000000000000004 /* SakuraCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SakuraCanvasView.swift; sourceTree = "<group>"; };
+		200000000000000000000005 /* SakuraOverlayWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SakuraOverlayWindow.swift; sourceTree = "<group>"; };
+		200000000000000000000006 /* SakuraSkyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SakuraSkyApp.swift; sourceTree = "<group>"; };
+		200000000000000000000007 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
+		200000000000000000000008 /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
+		200000000000000000000009 /* DisplayScale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayScale.swift; sourceTree = "<group>"; };
+		20000000000000000000000A /* EffectSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EffectSettings.swift; sourceTree = "<group>"; };
+		20000000000000000000000B /* DrawingHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingHelpers.swift; sourceTree = "<group>"; };
+		20000000000000000000000C /* Random.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Random.swift; sourceTree = "<group>"; };
+		20000000000000000000000D /* SakuraScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SakuraScene.swift; sourceTree = "<group>"; };
+		20000000000000000000000E /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = "<group>"; };
+		20000000000000000000000F /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon.png; sourceTree = "<group>"; };
+		200000000000000000000010 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		200000000000000000000011 /* Hazakura Wallpaper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Hazakura Wallpaper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		200000000000000000000012 /* EffectSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EffectSettingsStore.swift; sourceTree = "<group>"; };
+		200000000000000000000013 /* EffectSettingsCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EffectSettingsCommand.swift; sourceTree = "<group>"; };
+		200000000000000000000014 /* EffectSettingsMenuState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EffectSettingsMenuState.swift; sourceTree = "<group>"; };
+		200000000000000000000015 /* SmokeExitConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmokeExitConfiguration.swift; sourceTree = "<group>"; };
+		200000000000000000000016 /* OverlayTimingConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayTimingConfiguration.swift; sourceTree = "<group>"; };
+		20000000000000000000001A /* OverlayWindowGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayWindowGeometry.swift; sourceTree = "<group>"; };
+		20000000000000000000001C /* OverlayScreenIdentityTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayScreenIdentityTracker.swift; sourceTree = "<group>"; };
+		200000000000000000000017 /* AppAboutInformation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAboutInformation.swift; sourceTree = "<group>"; };
+		20000000000000000000001B /* AppExternalLinks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppExternalLinks.swift; sourceTree = "<group>"; };
+		200000000000000000000018 /* PointerMotionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointerMotionState.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		300000000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		400000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				400000000000000000000002 /* Sources */,
+				400000000000000000000006 /* Resources */,
+				400000000000000000000007 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		400000000000000000000002 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				400000000000000000000003 /* SakuraSky */,
+				400000000000000000000004 /* SakuraSkyCore */,
+				400000000000000000000005 /* SakuraSkyRenderer */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		400000000000000000000003 /* SakuraSky */ = {
+			isa = PBXGroup;
+			children = (
+				200000000000000000000001 /* AppDelegate.swift */,
+				200000000000000000000019 /* AppLoggers.swift */,
+				200000000000000000000002 /* IconLoader.swift */,
+				200000000000000000000003 /* OverlayController.swift */,
+				200000000000000000000004 /* SakuraCanvasView.swift */,
+				200000000000000000000005 /* SakuraOverlayWindow.swift */,
+				200000000000000000000006 /* SakuraSkyApp.swift */,
+				200000000000000000000007 /* SettingsStore.swift */,
+				200000000000000000000008 /* StatusBarController.swift */,
+			);
+			path = SakuraSky;
+			sourceTree = "<group>";
+		};
+		400000000000000000000004 /* SakuraSkyCore */ = {
+			isa = PBXGroup;
+			children = (
+				200000000000000000000017 /* AppAboutInformation.swift */,
+				20000000000000000000001B /* AppExternalLinks.swift */,
+				200000000000000000000009 /* DisplayScale.swift */,
+				20000000000000000000000A /* EffectSettings.swift */,
+				200000000000000000000013 /* EffectSettingsCommand.swift */,
+				200000000000000000000014 /* EffectSettingsMenuState.swift */,
+				200000000000000000000012 /* EffectSettingsStore.swift */,
+				20000000000000000000001C /* OverlayScreenIdentityTracker.swift */,
+				200000000000000000000016 /* OverlayTimingConfiguration.swift */,
+				20000000000000000000001A /* OverlayWindowGeometry.swift */,
+				200000000000000000000018 /* PointerMotionState.swift */,
+				200000000000000000000015 /* SmokeExitConfiguration.swift */,
+			);
+			path = SakuraSkyCore;
+			sourceTree = "<group>";
+		};
+		400000000000000000000005 /* SakuraSkyRenderer */ = {
+			isa = PBXGroup;
+			children = (
+				20000000000000000000000B /* DrawingHelpers.swift */,
+				20000000000000000000000C /* Random.swift */,
+				20000000000000000000000D /* SakuraScene.swift */,
+			);
+			path = SakuraSkyRenderer;
+			sourceTree = "<group>";
+		};
+		400000000000000000000006 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				200000000000000000000010 /* Info.plist */,
+				20000000000000000000000E /* icon.icns */,
+				20000000000000000000000F /* icon.png */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		400000000000000000000007 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				200000000000000000000011 /* Hazakura Wallpaper.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		500000000000000000000001 /* Hazakura Wallpaper */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 900000000000000000000002 /* Build configuration list for PBXNativeTarget "Hazakura Wallpaper" */;
+			buildPhases = (
+				600000000000000000000001 /* Sources */,
+				300000000000000000000001 /* Frameworks */,
+				700000000000000000000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Hazakura Wallpaper";
+			productName = "Hazakura Wallpaper";
+			productReference = 200000000000000000000011 /* Hazakura Wallpaper.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		800000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2650;
+				LastUpgradeCheck = 2650;
+				TargetAttributes = {
+					500000000000000000000001 = {
+						CreatedOnToolsVersion = 26.5;
+					};
+				};
+			};
+			buildConfigurationList = 900000000000000000000001 /* Build configuration list for PBXProject "SakuraSky" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = ja;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				ja,
+				en,
+			);
+			mainGroup = 400000000000000000000001;
+			productRefGroup = 400000000000000000000007 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				500000000000000000000001 /* Hazakura Wallpaper */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		700000000000000000000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				10000000000000000000000E /* icon.icns in Resources */,
+				10000000000000000000000F /* icon.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		600000000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				100000000000000000000001 /* AppDelegate.swift in Sources */,
+				100000000000000000000017 /* AppLoggers.swift in Sources */,
+				100000000000000000000002 /* IconLoader.swift in Sources */,
+				100000000000000000000003 /* OverlayController.swift in Sources */,
+				100000000000000000000004 /* SakuraCanvasView.swift in Sources */,
+				100000000000000000000005 /* SakuraOverlayWindow.swift in Sources */,
+				100000000000000000000006 /* SakuraSkyApp.swift in Sources */,
+				100000000000000000000007 /* SettingsStore.swift in Sources */,
+				100000000000000000000008 /* StatusBarController.swift in Sources */,
+				100000000000000000000015 /* AppAboutInformation.swift in Sources */,
+				100000000000000000000019 /* AppExternalLinks.swift in Sources */,
+				100000000000000000000009 /* DisplayScale.swift in Sources */,
+				10000000000000000000000A /* EffectSettings.swift in Sources */,
+				100000000000000000000011 /* EffectSettingsCommand.swift in Sources */,
+				100000000000000000000012 /* EffectSettingsMenuState.swift in Sources */,
+				100000000000000000000010 /* EffectSettingsStore.swift in Sources */,
+				10000000000000000000001A /* OverlayScreenIdentityTracker.swift in Sources */,
+				100000000000000000000014 /* OverlayTimingConfiguration.swift in Sources */,
+				100000000000000000000018 /* OverlayWindowGeometry.swift in Sources */,
+				100000000000000000000016 /* PointerMotionState.swift in Sources */,
+				100000000000000000000013 /* SmokeExitConfiguration.swift in Sources */,
+				10000000000000000000000B /* DrawingHelpers.swift in Sources */,
+				10000000000000000000000C /* Random.swift in Sources */,
+				10000000000000000000000D /* SakuraScene.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		900000000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+			};
+			name = Debug;
+		};
+		900000000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = NO;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		900000000000000000000005 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				EXECUTABLE_NAME = HazakuraWallpaper;
+				INFOPLIST_FILE = Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hazakuralab.hazakurawallpaper;
+				PRODUCT_NAME = "Hazakura Wallpaper";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		900000000000000000000006 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				EXECUTABLE_NAME = HazakuraWallpaper;
+				INFOPLIST_FILE = Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hazakuralab.hazakurawallpaper;
+				PRODUCT_NAME = "Hazakura Wallpaper";
+				ONLY_ACTIVE_ARCH = NO;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		900000000000000000000001 /* Build configuration list for PBXProject "SakuraSky" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				900000000000000000000003 /* Debug */,
+				900000000000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		900000000000000000000002 /* Build configuration list for PBXNativeTarget "Hazakura Wallpaper" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				900000000000000000000005 /* Debug */,
+				900000000000000000000006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 800000000000000000000001 /* Project object */;
+}
