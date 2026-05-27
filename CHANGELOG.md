@@ -4,6 +4,7 @@ All notable changes to Hazakura Wallpaper are recorded here.
 
 ## Unreleased
 
+- Reduced Spark ray cache hit overhead by replacing per-frame string cache keys with structured exact-dimension keys.
 - Reduced glow cache lookup overhead by computing normalized color stops and cache keys in one pass for Magic/Hotaru glow sprites.
 - Reduced CoreGraphics fallback allocation overhead for Magic and Hotaru glow sprites by drawing generated sprites directly instead of creating per-particle temporary arrays.
 - Reduced Magic and Hotaru glow sprite construction overhead by appending layer sprites into the existing frame buffer instead of creating per-particle temporary arrays.

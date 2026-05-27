@@ -5,8 +5,8 @@ import SakuraSkyCore
 #endif
 
 @MainActor private let maximumSparkRayPathCacheEntries = 512
-@MainActor private var sparkRayPathCache: [String: CGPath] = [:]
-@MainActor private var sparkRayPathCacheOrder: [String] = []
+@MainActor private var sparkRayPathCache: [SparkRayPathCacheKey: CGPath] = [:]
+@MainActor private var sparkRayPathCacheOrder: [SparkRayPathCacheKey] = []
 
 @MainActor func resetSparkRayPathCacheForTesting() {
     sparkRayPathCache.removeAll(keepingCapacity: true)
@@ -883,8 +883,18 @@ private struct SparkLine {
     }
 }
 
+private struct SparkRayPathCacheKey: Hashable {
+    var lengthBitPattern: UInt64
+    var widthBitPattern: UInt64
+
+    init(rayLength: CGFloat, rayWidth: CGFloat) {
+        lengthBitPattern = Double(rayLength).bitPattern
+        widthBitPattern = Double(rayWidth).bitPattern
+    }
+}
+
 @MainActor private func cachedSparkRayPath(rayLength: CGFloat, rayWidth: CGFloat) -> CGPath {
-    let key = "\(Double(rayLength).bitPattern):\(Double(rayWidth).bitPattern)"
+    let key = SparkRayPathCacheKey(rayLength: rayLength, rayWidth: rayWidth)
     if let cached = sparkRayPathCache[key] {
         return cached
     }
