@@ -4,6 +4,7 @@ All notable changes to Hazakura Wallpaper are recorded here.
 
 ## Unreleased
 
+- Reduced Magic and Hotaru glow sprite construction overhead by appending layer sprites into the existing frame buffer instead of creating per-particle temporary arrays.
 - Cached Spark ray paths so repeated frames reuse immutable CoreGraphics paths without reducing Spark density or changing settings behavior.
 - Added a renderer tuning loop for glow/particle changes that runs tests, deterministic previews, preview artifact checks, renderer memory smoke, optional app build, and whitespace validation from one command.
 - Pending normal-session release evidence before handing a DMG/ZIP to users:

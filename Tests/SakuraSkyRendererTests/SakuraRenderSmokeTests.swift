@@ -104,26 +104,28 @@ func rendererProducesVisiblePixelsForEveryMode(_ mode: EffectMode) {
     let bounds = CGRect(origin: .zero, size: size)
     let context = try #require(makeBitmapContext(size: size))
 
-    let magicSprites = SakuraScene.withDeterministicRandomSeed(42) {
+    let magicResult = SakuraScene.withDeterministicRandomSeed(42) {
         let scene = SakuraScene()
         scene.resize(to: size)
-        return scene.updateAndDrawLayerBacked(
+        let sprites = scene.updateAndDrawLayerBacked(
             in: context,
             bounds: bounds,
             time: 1,
             settings: EffectSettings(mode: .magic, intensity: .normal)
-        )
+        ) ?? []
+        return (sprites, scene.diagnostics)
     }
     context.clear(bounds)
-    let fireflySprites = SakuraScene.withDeterministicRandomSeed(42) {
+    let fireflyResult = SakuraScene.withDeterministicRandomSeed(42) {
         let scene = SakuraScene()
         scene.resize(to: size)
-        return scene.updateAndDrawLayerBacked(
+        let sprites = scene.updateAndDrawLayerBacked(
             in: context,
             bounds: bounds,
             time: 1,
             settings: EffectSettings(mode: .firefly, intensity: .normal)
-        )
+        ) ?? []
+        return (sprites, scene.diagnostics)
     }
     context.clear(bounds)
     let sakuraSprites = SakuraScene.withDeterministicRandomSeed(42) {
@@ -137,8 +139,19 @@ func rendererProducesVisiblePixelsForEveryMode(_ mode: EffectMode) {
         )
     }
 
-    #expect((magicSprites ?? []).count > 0)
-    #expect((fireflySprites ?? []).count > 0)
+    let expectedMagicSprites = ParticleBudget.visibleCount(
+        baseCount: 180,
+        availableCount: magicResult.1.magicLightCount,
+        intensity: .normal
+    ) * 2
+    let expectedFireflySprites = ParticleBudget.visibleCount(
+        baseCount: 118,
+        availableCount: fireflyResult.1.fireflyCount,
+        intensity: .normal
+    ) * 2
+
+    #expect(magicResult.0.count == expectedMagicSprites)
+    #expect(fireflyResult.0.count == expectedFireflySprites)
     #expect(sakuraSprites == nil)
 }
 

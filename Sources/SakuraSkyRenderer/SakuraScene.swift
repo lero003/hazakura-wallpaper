@@ -238,7 +238,7 @@ public final class SakuraScene {
         sprites.reserveCapacity(visibleCount * 2)
         for index in 0..<visibleCount {
             magicLights[index].update(time: time, pointer: pointer, bounds: bounds, settings: settings)
-            sprites.append(contentsOf: magicLights[index].layerSprites(time: time, settings: settings))
+            magicLights[index].appendLayerSprites(to: &sprites, time: time, settings: settings)
         }
         return sprites
     }
@@ -273,7 +273,7 @@ public final class SakuraScene {
         sprites.reserveCapacity(visibleCount * 2)
         for index in 0..<visibleCount {
             fireflies[index].update(time: time, pointer: pointer, bounds: bounds, settings: settings)
-            sprites.append(contentsOf: fireflies[index].layerSprites(time: time, settings: settings))
+            fireflies[index].appendLayerSprites(to: &sprites, time: time, settings: settings)
         }
         return sprites
     }
@@ -613,7 +613,9 @@ private struct MagicLight {
     }
 
     @MainActor func draw(in context: CGContext, time: TimeInterval, settings: EffectSettings) {
-        let sprites = layerSprites(time: time, settings: settings)
+        var sprites: [SakuraGlowLayerSprite] = []
+        sprites.reserveCapacity(2)
+        appendLayerSprites(to: &sprites, time: time, settings: settings)
 
         context.saveGState()
         context.setBlendMode(.plusLighter)
@@ -627,6 +629,17 @@ private struct MagicLight {
     }
 
     @MainActor func layerSprites(time: TimeInterval, settings: EffectSettings) -> [SakuraGlowLayerSprite] {
+        var sprites: [SakuraGlowLayerSprite] = []
+        sprites.reserveCapacity(2)
+        appendLayerSprites(to: &sprites, time: time, settings: settings)
+        return sprites
+    }
+
+    @MainActor func appendLayerSprites(
+        to sprites: inout [SakuraGlowLayerSprite],
+        time: TimeInterval,
+        settings: EffectSettings
+    ) {
         let twinkle = 0.72 + sin(CGFloat(time) * 4 + phase) * 0.28
         let drawAlpha = alpha * twinkle * settings.intensity.alphaScale
         let orbitPhase = AnimationClock.legacyOrbitPhase(time: time, orbitSpeed: orbitSpeed, phase: phase)
@@ -647,6 +660,9 @@ private struct MagicLight {
             colors: outerColors,
             locations: [0, 0.42, 1]
         )
+        if let outer {
+            sprites.append(outer)
+        }
         let innerColors = [
             cgColor(hue: (hue + 8) / 360, saturation: 1, brightness: 0.94, alpha: 0.68 * drawAlpha),
             cgColor(hue: hue / 360, saturation: 1, brightness: 0.82, alpha: 0.22 * drawAlpha),
@@ -658,7 +674,9 @@ private struct MagicLight {
             colors: innerColors,
             locations: [0, 0.62, 1]
         )
-        return [outer, inner].compactMap { $0 }
+        if let inner {
+            sprites.append(inner)
+        }
     }
 
     private mutating func applyRepel(pointer: PointerMotionState, radius: CGFloat, strength: CGFloat, settings: EffectSettings) {
@@ -711,7 +729,9 @@ private struct Firefly {
     }
 
     @MainActor func draw(in context: CGContext, time: TimeInterval, settings: EffectSettings) {
-        let sprites = layerSprites(time: time, settings: settings)
+        var sprites: [SakuraGlowLayerSprite] = []
+        sprites.reserveCapacity(2)
+        appendLayerSprites(to: &sprites, time: time, settings: settings)
 
         context.saveGState()
         context.setBlendMode(.plusLighter)
@@ -725,6 +745,17 @@ private struct Firefly {
     }
 
     @MainActor func layerSprites(time: TimeInterval, settings: EffectSettings) -> [SakuraGlowLayerSprite] {
+        var sprites: [SakuraGlowLayerSprite] = []
+        sprites.reserveCapacity(2)
+        appendLayerSprites(to: &sprites, time: time, settings: settings)
+        return sprites
+    }
+
+    @MainActor func appendLayerSprites(
+        to sprites: inout [SakuraGlowLayerSprite],
+        time: TimeInterval,
+        settings: EffectSettings
+    ) {
         let twinkle = max(0.18, 0.66 + sin(CGFloat(time) * 3.4 + phase) * 0.34)
         let drawAlpha = alpha * twinkle * settings.intensity.alphaScale
         let drawSize = size * settings.intensity.sizeScale
@@ -740,6 +771,9 @@ private struct Firefly {
             ],
             locations: [0, 0.45, 1]
         )
+        if let outer {
+            sprites.append(outer)
+        }
         let inner = makeGlowLayerSprite(
             center: point,
             radius: drawSize * 2.1,
@@ -750,7 +784,9 @@ private struct Firefly {
             ],
             locations: [0, 0.58, 1]
         )
-        return [outer, inner].compactMap { $0 }
+        if let inner {
+            sprites.append(inner)
+        }
     }
 
     private mutating func applyRepel(pointer: PointerMotionState, radius: CGFloat, strength: CGFloat, settings: EffectSettings) {
