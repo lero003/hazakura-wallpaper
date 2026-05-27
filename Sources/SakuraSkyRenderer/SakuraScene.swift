@@ -692,6 +692,23 @@ private struct MagicLight {
 }
 
 private struct Firefly {
+    private static let outerGlowSpec = SakuraGlowImageSpec(
+        colors: [
+            RGBAColor(226, 255, 159, 1).cgColor,
+            RGBAColor(122, 214, 112, 0.5).cgColor,
+            RGBAColor(122, 214, 112, 0).cgColor
+        ],
+        locations: [0, 0.45, 1]
+    )!
+    private static let innerGlowSpec = SakuraGlowImageSpec(
+        colors: [
+            RGBAColor(255, 250, 178, 1).cgColor,
+            RGBAColor(204, 245, 105, 0.2 / 0.76).cgColor,
+            RGBAColor(204, 245, 105, 0).cgColor
+        ],
+        locations: [0, 0.58, 1]
+    )!
+
     var x: CGFloat = 0
     var y: CGFloat = 0
     var size: CGFloat = 0
@@ -759,30 +776,20 @@ private struct Firefly {
         let drawSize = size * settings.intensity.sizeScale
         let point = CGPoint(x: x, y: y)
 
-        let outer = makeGlowLayerSprite(
+        if let outer = makeGlowLayerSprite(
             center: point,
             radius: drawSize * 7.2,
-            colors: [
-                RGBAColor(226, 255, 159, 0.28 * drawAlpha).cgColor,
-                RGBAColor(122, 214, 112, 0.14 * drawAlpha).cgColor,
-                RGBAColor(122, 214, 112, 0).cgColor
-            ],
-            locations: [0, 0.45, 1]
-        )
-        if let outer {
+            opacity: 0.28 * drawAlpha,
+            spec: Self.outerGlowSpec
+        ) {
             body(outer)
         }
-        let inner = makeGlowLayerSprite(
+        if let inner = makeGlowLayerSprite(
             center: point,
             radius: drawSize * 2.1,
-            colors: [
-                RGBAColor(255, 250, 178, 0.76 * drawAlpha).cgColor,
-                RGBAColor(204, 245, 105, 0.2 * drawAlpha).cgColor,
-                RGBAColor(204, 245, 105, 0).cgColor
-            ],
-            locations: [0, 0.58, 1]
-        )
-        if let inner {
+            opacity: 0.76 * drawAlpha,
+            spec: Self.innerGlowSpec
+        ) {
             body(inner)
         }
     }

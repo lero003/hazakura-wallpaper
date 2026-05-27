@@ -40,6 +40,27 @@ public struct SakuraGlowLayerSprite {
     public let frame: CGRect
 }
 
+struct SakuraGlowImageSpec {
+    private let colors: [CGColor]
+    private let locations: [CGFloat]
+    private let cacheKey: GlowImageCacheKey
+
+    init?(colors: [CGColor], locations: [CGFloat]) {
+        guard !colors.isEmpty,
+              colors.count == locations.count,
+              let colorStops = normalizedGlowColorStops(colors: colors, opacity: 1, locations: locations)
+        else { return nil }
+
+        self.colors = colorStops.colors
+        self.locations = locations
+        self.cacheKey = colorStops.cacheKey
+    }
+
+    @MainActor fileprivate func image() -> CGImage? {
+        cachedGlowImage(colors: colors, locations: locations, cacheKey: cacheKey)
+    }
+}
+
 @MainActor private func cachedPetalGradient(color: RGBAColor) -> CGGradient? {
     let key = "\(color.red):\(color.green):\(color.blue)"
     if let cached = petalGradientCache[key] { return cached }
@@ -186,6 +207,30 @@ extension CGContext {
           colors.count == locations.count,
           let colorStops = normalizedGlowColorStops(colors: colors, opacity: opacity, locations: locations),
           let image = cachedGlowImage(colors: colorStops.colors, locations: locations, cacheKey: colorStops.cacheKey)
+    else { return nil }
+
+    let diameter = radius * 2
+    return SakuraGlowLayerSprite(
+        image: image,
+        opacity: opacity,
+        frame: CGRect(
+            x: center.x - radius,
+            y: center.y - radius,
+            width: diameter,
+            height: diameter
+        )
+    )
+}
+
+@MainActor func makeGlowLayerSprite(
+    center: CGPoint,
+    radius: CGFloat,
+    opacity: CGFloat,
+    spec: SakuraGlowImageSpec
+) -> SakuraGlowLayerSprite? {
+    guard radius > 0,
+          opacity > 0.01,
+          let image = spec.image()
     else { return nil }
 
     let diameter = radius * 2

@@ -118,6 +118,53 @@ func rendererProducesVisiblePixelsForEveryMode(_ mode: EffectMode) {
 }
 
 @MainActor
+@Test func fixedGlowImageSpecReusesCachedImageAcrossOpacityChanges() throws {
+    resetGlowImageCacheForTesting()
+    let spec = try #require(SakuraGlowImageSpec(
+        colors: [
+            RGBAColor(226, 255, 159, 1).cgColor,
+            RGBAColor(122, 214, 112, 0.5).cgColor,
+            RGBAColor(122, 214, 112, 0).cgColor
+        ],
+        locations: [0, 0.45, 1]
+    ))
+
+    let first = makeGlowLayerSprite(
+        center: .zero,
+        radius: 20,
+        opacity: 0.18,
+        spec: spec
+    )
+    let firstCount = glowImageCacheEntryCountForTesting()
+    let second = makeGlowLayerSprite(
+        center: .zero,
+        radius: 20,
+        opacity: 0.42,
+        spec: spec
+    )
+    let secondCount = glowImageCacheEntryCountForTesting()
+    let dynamicEquivalent = makeGlowLayerSprite(
+        center: .zero,
+        radius: 20,
+        colors: [
+            RGBAColor(226, 255, 159, 0.42).cgColor,
+            RGBAColor(122, 214, 112, 0.21).cgColor,
+            RGBAColor(122, 214, 112, 0).cgColor
+        ],
+        locations: [0, 0.45, 1]
+    )
+    let dynamicCount = glowImageCacheEntryCountForTesting()
+
+    #expect(first != nil)
+    #expect(second != nil)
+    #expect(dynamicEquivalent != nil)
+    #expect(firstCount == 1)
+    #expect(secondCount == firstCount)
+    #expect(dynamicCount == firstCount)
+    #expect(dynamicEquivalent?.opacity == second?.opacity)
+}
+
+@MainActor
 @Test func firstSmallSakuraRenderKeepsEnoughParticlesInFrame() {
     let visiblePixels = SakuraScene.withDeterministicRandomSeed(42) {
         SakuraRenderSmoke.nonTransparentPixelCount(
