@@ -613,13 +613,9 @@ private struct MagicLight {
     }
 
     @MainActor func draw(in context: CGContext, time: TimeInterval, settings: EffectSettings) {
-        var sprites: [SakuraGlowLayerSprite] = []
-        sprites.reserveCapacity(2)
-        appendLayerSprites(to: &sprites, time: time, settings: settings)
-
         context.saveGState()
         context.setBlendMode(.plusLighter)
-        for sprite in sprites {
+        forEachLayerSprite(time: time, settings: settings) { sprite in
             context.saveGState()
             context.setAlpha(sprite.opacity)
             context.draw(sprite.image, in: sprite.frame)
@@ -628,17 +624,20 @@ private struct MagicLight {
         context.restoreGState()
     }
 
-    @MainActor func layerSprites(time: TimeInterval, settings: EffectSettings) -> [SakuraGlowLayerSprite] {
-        var sprites: [SakuraGlowLayerSprite] = []
-        sprites.reserveCapacity(2)
-        appendLayerSprites(to: &sprites, time: time, settings: settings)
-        return sprites
-    }
-
     @MainActor func appendLayerSprites(
         to sprites: inout [SakuraGlowLayerSprite],
         time: TimeInterval,
         settings: EffectSettings
+    ) {
+        forEachLayerSprite(time: time, settings: settings) { sprite in
+            sprites.append(sprite)
+        }
+    }
+
+    @MainActor private func forEachLayerSprite(
+        time: TimeInterval,
+        settings: EffectSettings,
+        _ body: (SakuraGlowLayerSprite) -> Void
     ) {
         let twinkle = 0.72 + sin(CGFloat(time) * 4 + phase) * 0.28
         let drawAlpha = alpha * twinkle * settings.intensity.alphaScale
@@ -661,7 +660,7 @@ private struct MagicLight {
             locations: [0, 0.42, 1]
         )
         if let outer {
-            sprites.append(outer)
+            body(outer)
         }
         let innerColors = [
             cgColor(hue: (hue + 8) / 360, saturation: 1, brightness: 0.94, alpha: 0.68 * drawAlpha),
@@ -675,7 +674,7 @@ private struct MagicLight {
             locations: [0, 0.62, 1]
         )
         if let inner {
-            sprites.append(inner)
+            body(inner)
         }
     }
 
@@ -729,13 +728,9 @@ private struct Firefly {
     }
 
     @MainActor func draw(in context: CGContext, time: TimeInterval, settings: EffectSettings) {
-        var sprites: [SakuraGlowLayerSprite] = []
-        sprites.reserveCapacity(2)
-        appendLayerSprites(to: &sprites, time: time, settings: settings)
-
         context.saveGState()
         context.setBlendMode(.plusLighter)
-        for sprite in sprites {
+        forEachLayerSprite(time: time, settings: settings) { sprite in
             context.saveGState()
             context.setAlpha(sprite.opacity)
             context.draw(sprite.image, in: sprite.frame)
@@ -744,17 +739,20 @@ private struct Firefly {
         context.restoreGState()
     }
 
-    @MainActor func layerSprites(time: TimeInterval, settings: EffectSettings) -> [SakuraGlowLayerSprite] {
-        var sprites: [SakuraGlowLayerSprite] = []
-        sprites.reserveCapacity(2)
-        appendLayerSprites(to: &sprites, time: time, settings: settings)
-        return sprites
-    }
-
     @MainActor func appendLayerSprites(
         to sprites: inout [SakuraGlowLayerSprite],
         time: TimeInterval,
         settings: EffectSettings
+    ) {
+        forEachLayerSprite(time: time, settings: settings) { sprite in
+            sprites.append(sprite)
+        }
+    }
+
+    @MainActor private func forEachLayerSprite(
+        time: TimeInterval,
+        settings: EffectSettings,
+        _ body: (SakuraGlowLayerSprite) -> Void
     ) {
         let twinkle = max(0.18, 0.66 + sin(CGFloat(time) * 3.4 + phase) * 0.34)
         let drawAlpha = alpha * twinkle * settings.intensity.alphaScale
@@ -772,7 +770,7 @@ private struct Firefly {
             locations: [0, 0.45, 1]
         )
         if let outer {
-            sprites.append(outer)
+            body(outer)
         }
         let inner = makeGlowLayerSprite(
             center: point,
@@ -785,7 +783,7 @@ private struct Firefly {
             locations: [0, 0.58, 1]
         )
         if let inner {
-            sprites.append(inner)
+            body(inner)
         }
     }
 

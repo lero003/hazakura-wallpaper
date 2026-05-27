@@ -156,6 +156,21 @@ func rendererProducesVisiblePixelsForEveryMode(_ mode: EffectMode) {
 }
 
 @MainActor
+@Test(arguments: [EffectMode.magic, EffectMode.firefly])
+func coreGraphicsFallbackKeepsGlowHeavyModesVisible(_ mode: EffectMode) {
+    let visiblePixels = SakuraScene.withDeterministicRandomSeed(42) {
+        SakuraRenderSmoke.nonTransparentPixelCount(
+            mode: mode,
+            intensity: .play,
+            size: CGSize(width: 180, height: 120),
+            time: 1
+        )
+    }
+
+    #expect(visiblePixels > 120)
+}
+
+@MainActor
 @Test func sparkRendererReusesRayPathsBetweenFrames() throws {
     resetSparkRayPathCacheForTesting()
     let scene = SakuraScene()
