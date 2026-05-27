@@ -7,6 +7,7 @@
 - Latest generated unsigned ZIP candidate is `dist/Hazakura Wallpaper.zip` with SHA-256 `eae952068e83125d55639569e5919ba03bcf2f688e0e6eca15b674a88944b967`; share readiness is still intentionally blocked on normal-session evidence.
 
 ## Recent Changes
+- Reduced Magic/Hotaru glow cache lookup overhead by computing normalized color stops and cache keys in one pass while keeping cached glow image output unchanged.
 - Reduced CoreGraphics fallback allocation overhead for Magic and Hotaru by sharing sprite generation with the layer-backed path while drawing each generated glow sprite directly.
 - Reduced Magic and Hotaru layer-backed glow sprite construction overhead by appending sprites into the caller's frame buffer, preserving glow density while avoiding per-particle temporary sprite arrays.
 - Added `npm run renderer:tune` / `scripts/check_renderer_tuning_loop.sh` so glow and particle tuning can run tests, deterministic previews, preview artifact checks, renderer memory smoke, optional app build, and whitespace validation from one command.

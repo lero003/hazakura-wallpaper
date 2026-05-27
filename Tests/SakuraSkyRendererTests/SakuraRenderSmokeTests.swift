@@ -86,6 +86,38 @@ func rendererProducesVisiblePixelsForEveryMode(_ mode: EffectMode) {
 }
 
 @MainActor
+@Test func glowImageCacheReusesNormalizedAlphaStops() throws {
+    resetGlowImageCacheForTesting()
+    let first = makeGlowLayerSprite(
+        center: .zero,
+        radius: 12,
+        colors: [
+            RGBAColor(255, 250, 178, 0.76).cgColor,
+            RGBAColor(204, 245, 105, 0.2).cgColor,
+            RGBAColor(204, 245, 105, 0).cgColor
+        ],
+        locations: [0, 0.58, 1]
+    )
+    let firstCount = glowImageCacheEntryCountForTesting()
+    let second = makeGlowLayerSprite(
+        center: .zero,
+        radius: 12,
+        colors: [
+            RGBAColor(255, 250, 178, 0.38).cgColor,
+            RGBAColor(204, 245, 105, 0.1).cgColor,
+            RGBAColor(204, 245, 105, 0).cgColor
+        ],
+        locations: [0, 0.58, 1]
+    )
+    let secondCount = glowImageCacheEntryCountForTesting()
+
+    #expect(first != nil)
+    #expect(second != nil)
+    #expect(firstCount == 1)
+    #expect(secondCount == firstCount)
+}
+
+@MainActor
 @Test func firstSmallSakuraRenderKeepsEnoughParticlesInFrame() {
     let visiblePixels = SakuraScene.withDeterministicRandomSeed(42) {
         SakuraRenderSmoke.nonTransparentPixelCount(

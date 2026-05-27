@@ -22,8 +22,17 @@ private let maximumGlowCacheEntries = 96
 
 @MainActor private var petalImageCache: [String: CGImage] = [:]
 @MainActor private var petalGradientCache: [String: CGGradient] = [:]
-@MainActor private var glowImageCache: [String: CGImage] = [:]
-@MainActor private var glowImageCacheOrder: [String] = []
+@MainActor private var glowImageCache: [GlowImageCacheKey: CGImage] = [:]
+@MainActor private var glowImageCacheOrder: [GlowImageCacheKey] = []
+
+@MainActor func resetGlowImageCacheForTesting() {
+    glowImageCache.removeAll(keepingCapacity: true)
+    glowImageCacheOrder.removeAll(keepingCapacity: true)
+}
+
+@MainActor func glowImageCacheEntryCountForTesting() -> Int {
+    glowImageCache.count
+}
 
 public struct SakuraGlowLayerSprite {
     public let image: CGImage
@@ -175,7 +184,8 @@ extension CGContext {
           opacity > 0.01,
           !colors.isEmpty,
           colors.count == locations.count,
-          let image = cachedGlowImage(colors: normalizedGlowColors(colors, opacity: opacity), locations: locations)
+          let colorStops = normalizedGlowColorStops(colors: colors, opacity: opacity, locations: locations),
+          let image = cachedGlowImage(colors: colorStops.colors, locations: locations, cacheKey: colorStops.cacheKey)
     else { return nil }
 
     let diameter = radius * 2
@@ -191,9 +201,8 @@ extension CGContext {
     )
 }
 
-@MainActor private func cachedGlowImage(colors: [CGColor], locations: [CGFloat]) -> CGImage? {
-    let key = glowCacheKey(colors: colors, locations: locations)
-    if let cached = glowImageCache[key] {
+@MainActor private func cachedGlowImage(colors: [CGColor], locations: [CGFloat], cacheKey: GlowImageCacheKey) -> CGImage? {
+    if let cached = glowImageCache[cacheKey] {
         return cached
     }
 
@@ -201,8 +210,8 @@ extension CGContext {
         return nil
     }
 
-    glowImageCache[key] = image
-    glowImageCacheOrder.append(key)
+    glowImageCache[cacheKey] = image
+    glowImageCacheOrder.append(cacheKey)
     while glowImageCacheOrder.count > maximumGlowCacheEntries {
         let removedKey = glowImageCacheOrder.removeFirst()
         glowImageCache.removeValue(forKey: removedKey)
@@ -240,17 +249,46 @@ private func makeGlowImage(colors: [CGColor], locations: [CGFloat]) -> CGImage? 
     return context.makeImage()
 }
 
-private func glowCacheKey(colors: [CGColor], locations: [CGFloat]) -> String {
-    zip(colors, locations)
-        .map { color, location in
-            let rgba = quantizedRGBAComponents(for: color)
-            let stop = Int((location * 1_000).rounded())
-            return "\(stop):\(rgba.red):\(rgba.green):\(rgba.blue):\(rgba.alpha)"
-        }
-        .joined(separator: "|")
+private struct GlowImageCacheKey: Hashable {
+    var stops: [GlowImageColorStop]
 }
 
-private func quantizedRGBAComponents(for color: CGColor) -> (red: Int, green: Int, blue: Int, alpha: Int) {
+private struct GlowImageColorStop: Hashable {
+    var location: Int
+    var red: Int
+    var green: Int
+    var blue: Int
+    var alpha: Int
+}
+
+private func normalizedGlowColorStops(
+    colors: [CGColor],
+    opacity: CGFloat,
+    locations: [CGFloat]
+) -> (colors: [CGColor], cacheKey: GlowImageCacheKey)? {
+    guard opacity > 0, colors.count == locations.count else { return nil }
+
+    var normalizedColors: [CGColor] = []
+    normalizedColors.reserveCapacity(colors.count)
+    var stops: [GlowImageColorStop] = []
+    stops.reserveCapacity(colors.count)
+
+    for (color, location) in zip(colors, locations) {
+        let rgba = normalizedRGBAComponents(for: color, opacity: opacity)
+        normalizedColors.append(CGColor(red: rgba.red, green: rgba.green, blue: rgba.blue, alpha: rgba.alpha))
+        stops.append(GlowImageColorStop(
+            location: Int((location * 1_000).rounded()),
+            red: quantizedColorComponent(rgba.red),
+            green: quantizedColorComponent(rgba.green),
+            blue: quantizedColorComponent(rgba.blue),
+            alpha: quantizedColorComponent(rgba.alpha)
+        ))
+    }
+
+    return (normalizedColors, GlowImageCacheKey(stops: stops))
+}
+
+private func normalizedRGBAComponents(for color: CGColor, opacity: CGFloat) -> (red: CGFloat, green: CGFloat, blue: CGFloat, alpha: CGFloat) {
     let converted = color.converted(to: deviceRGB, intent: .defaultIntent, options: nil) ?? color
     let components = converted.components ?? []
     let red: CGFloat
@@ -269,10 +307,10 @@ private func quantizedRGBAComponents(for color: CGColor) -> (red: Int, green: In
     }
 
     return (
-        red: quantizedColorComponent(red),
-        green: quantizedColorComponent(green),
-        blue: quantizedColorComponent(blue),
-        alpha: quantizedColorComponent(color.alpha)
+        red: min(1, max(0, red)),
+        green: min(1, max(0, green)),
+        blue: min(1, max(0, blue)),
+        alpha: min(1, max(0, color.alpha / opacity))
     )
 }
 
@@ -284,35 +322,6 @@ private func quantizedColorComponent(_ value: CGFloat) -> Int {
 private func glowOpacity(for colors: [CGColor]) -> CGFloat {
     colors.reduce(CGFloat.zero) { opacity, color in
         max(opacity, color.alpha)
-    }
-}
-
-private func normalizedGlowColors(_ colors: [CGColor], opacity: CGFloat) -> [CGColor] {
-    guard opacity > 0 else { return colors }
-    return colors.map { color in
-        let converted = color.converted(to: deviceRGB, intent: .defaultIntent, options: nil) ?? color
-        let components = converted.components ?? []
-        let red: CGFloat
-        let green: CGFloat
-        let blue: CGFloat
-
-        if components.count >= 3 {
-            red = components[0]
-            green = components[1]
-            blue = components[2]
-        } else {
-            let gray = components.first ?? 0
-            red = gray
-            green = gray
-            blue = gray
-        }
-
-        return CGColor(
-            red: min(1, max(0, red)),
-            green: min(1, max(0, green)),
-            blue: min(1, max(0, blue)),
-            alpha: min(1, max(0, color.alpha / opacity))
-        )
     }
 }
 
