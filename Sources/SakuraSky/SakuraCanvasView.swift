@@ -100,9 +100,11 @@ final class SakuraCanvasView: NSView {
         autoreleasepool {
             guard let context = NSGraphicsContext.current?.cgContext else { return }
             context.clear(bounds)
-            glowLayerCompositor.hide()
 
-            guard settings.shouldAnimateOverlay else { return }
+            guard settings.shouldAnimateOverlay else {
+                glowLayerCompositor.hide()
+                return
+            }
 
             let time = CACurrentMediaTime() - startTime
             let renderingSettings = settings.renderingSettings(reducesMotion: reducesMotion)
@@ -118,6 +120,7 @@ final class SakuraCanvasView: NSView {
                     contentsScale: window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 2
                 )
             } else {
+                glowLayerCompositor.hide()
                 scene.updateAndDraw(in: context, bounds: bounds, time: time, settings: renderingSettings)
             }
         }

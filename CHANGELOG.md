@@ -4,6 +4,7 @@ All notable changes to Hazakura Wallpaper are recorded here.
 
 ## Unreleased
 
+- Reduced Magic/Hotaru layer-backed compositor work by avoiding a redundant hide/apply cycle on glow-backed frames.
 - Reduced Hotaru glow sprite setup overhead by reusing fixed normalized glow image specs across opacity changes.
 - Reduced Spark ray cache hit overhead by replacing per-frame string cache keys with structured exact-dimension keys.
 - Reduced glow cache lookup overhead by computing normalized color stops and cache keys in one pass for Magic/Hotaru glow sprites.
