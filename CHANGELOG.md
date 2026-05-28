@@ -4,6 +4,7 @@ All notable changes to Hazakura Wallpaper are recorded here.
 
 ## Unreleased
 
+- Reduced Magic glow reuse churn by keeping play-intensity glow images in cache and reusing per-particle glow image specs across alpha changes.
 - Fixed GitHub Actions release checks on macOS runners that do not include `rg` by default.
 
 ## 1.0.1 - 2026-05-28

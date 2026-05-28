@@ -570,6 +570,28 @@ private struct Sparkle: Particle {
 }
 
 private struct MagicLight {
+    private static func outerGlowSpec(hue: CGFloat) -> SakuraGlowImageSpec? {
+        SakuraGlowImageSpec(
+            colors: [
+                cgColor(hue: hue / 360, saturation: 0.96, brightness: 0.88, alpha: 1),
+                cgColor(hue: (hue + 24) / 360, saturation: 0.92, brightness: 0.72, alpha: 0.11 / 0.34),
+                cgColor(hue: hue / 360, saturation: 0.96, brightness: 0.6, alpha: 0)
+            ],
+            locations: [0, 0.42, 1]
+        )
+    }
+
+    private static func innerGlowSpec(hue: CGFloat) -> SakuraGlowImageSpec? {
+        SakuraGlowImageSpec(
+            colors: [
+                cgColor(hue: (hue + 8) / 360, saturation: 1, brightness: 0.94, alpha: 1),
+                cgColor(hue: hue / 360, saturation: 1, brightness: 0.82, alpha: 0.22 / 0.68),
+                cgColor(hue: hue / 360, saturation: 1, brightness: 0.7, alpha: 0)
+            ],
+            locations: [0, 0.62, 1]
+        )
+    }
+
     var x: CGFloat = 0
     var y: CGFloat = 0
     var size: CGFloat = 2
@@ -580,6 +602,8 @@ private struct MagicLight {
     var spin: CGFloat = 0
     var alpha: CGFloat = 0
     var hue: CGFloat = 300
+    private var outerGlowSpec: SakuraGlowImageSpec?
+    private var innerGlowSpec: SakuraGlowImageSpec?
 
     init(initial: Bool, bounds: CGRect) {
         reset(initial: initial, bounds: bounds)
@@ -596,6 +620,8 @@ private struct MagicLight {
         spin = Random.cgFloat((-0.02)...0.02)
         alpha = Random.cgFloat(0.22...0.58)
         hue = Random.cgFloat(292...334)
+        outerGlowSpec = Self.outerGlowSpec(hue: hue)
+        innerGlowSpec = Self.innerGlowSpec(hue: hue)
     }
 
     mutating func update(time: TimeInterval, pointer: PointerMotionState, bounds: CGRect, settings: EffectSettings) {
@@ -648,31 +674,25 @@ private struct MagicLight {
         )
         let drawSize = size * settings.intensity.sizeScale
 
-        let outerColors = [
-            cgColor(hue: hue / 360, saturation: 0.96, brightness: 0.88, alpha: 0.34 * drawAlpha),
-            cgColor(hue: (hue + 24) / 360, saturation: 0.92, brightness: 0.72, alpha: 0.11 * drawAlpha),
-            cgColor(hue: hue / 360, saturation: 0.96, brightness: 0.6, alpha: 0)
-        ]
-        let outer = makeGlowLayerSprite(
-            center: point,
-            radius: drawSize * 5.2,
-            colors: outerColors,
-            locations: [0, 0.42, 1]
-        )
+        let outer = outerGlowSpec.flatMap { spec in
+            makeGlowLayerSprite(
+                center: point,
+                radius: drawSize * 5.2,
+                opacity: 0.34 * drawAlpha,
+                spec: spec
+            )
+        }
         if let outer {
             body(outer)
         }
-        let innerColors = [
-            cgColor(hue: (hue + 8) / 360, saturation: 1, brightness: 0.94, alpha: 0.68 * drawAlpha),
-            cgColor(hue: hue / 360, saturation: 1, brightness: 0.82, alpha: 0.22 * drawAlpha),
-            cgColor(hue: hue / 360, saturation: 1, brightness: 0.7, alpha: 0)
-        ]
-        let inner = makeGlowLayerSprite(
-            center: point,
-            radius: drawSize * 1.7,
-            colors: innerColors,
-            locations: [0, 0.62, 1]
-        )
+        let inner = innerGlowSpec.flatMap { spec in
+            makeGlowLayerSprite(
+                center: point,
+                radius: drawSize * 1.7,
+                opacity: 0.68 * drawAlpha,
+                spec: spec
+            )
+        }
         if let inner {
             body(inner)
         }

@@ -4,7 +4,7 @@ let deviceRGB: CGColorSpace = CGColorSpaceCreateDeviceRGB()
 
 private let petalRenderScale: CGFloat = 128
 private let glowRenderScale: CGFloat = 128
-private let maximumGlowCacheEntries = 96
+private let maximumGlowCacheEntries = 640
 
 @MainActor private let petalPath: CGPath = {
     let w: CGFloat = 0.48

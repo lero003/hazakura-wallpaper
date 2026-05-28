@@ -235,6 +235,45 @@ func rendererProducesVisiblePixelsForEveryMode(_ mode: EffectMode) {
 }
 
 @MainActor
+@Test func magicGlowImageCacheCoversPlayFrameReuse() throws {
+    resetGlowImageCacheForTesting()
+    let scene = SakuraScene()
+    let size = CGSize(width: 240, height: 160)
+    let bounds = CGRect(origin: .zero, size: size)
+    let context = try #require(makeBitmapContext(size: size))
+    let settings = EffectSettings(mode: .magic, intensity: .play)
+
+    SakuraScene.withDeterministicRandomSeed(42) {
+        scene.resize(to: size)
+    }
+
+    let firstSprites = scene.updateAndDrawLayerBacked(
+        in: context,
+        bounds: bounds,
+        time: 1,
+        settings: settings
+    ) ?? []
+    let firstFrameEntryCount = glowImageCacheEntryCountForTesting()
+    context.clear(bounds)
+    let secondSprites = scene.updateAndDrawLayerBacked(
+        in: context,
+        bounds: bounds,
+        time: 1 + (1 / 30),
+        settings: settings
+    ) ?? []
+    let secondFrameEntryCount = glowImageCacheEntryCountForTesting()
+
+    #expect(firstSprites.count == ParticleBudget.visibleCount(
+        baseCount: 180,
+        availableCount: scene.diagnostics.magicLightCount,
+        intensity: .play
+    ) * 2)
+    #expect(secondSprites.count == firstSprites.count)
+    #expect(firstFrameEntryCount > 96)
+    #expect(secondFrameEntryCount == firstFrameEntryCount)
+}
+
+@MainActor
 @Test(arguments: [EffectMode.magic, EffectMode.firefly])
 func coreGraphicsFallbackKeepsGlowHeavyModesVisible(_ mode: EffectMode) {
     let visiblePixels = SakuraScene.withDeterministicRandomSeed(42) {
