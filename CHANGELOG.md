@@ -4,10 +4,14 @@ All notable changes to Hazakura Wallpaper are recorded here.
 
 ## Unreleased
 
+## 1.0.2 - 2026-05-28
+
 - Added the MIT License to clarify reuse, modification, and redistribution terms.
 - Reduced Magic/Hotaru layer-backed compositor contents churn by reapplying glow images only when a reused sprite layer's image changes.
 - Reduced Magic glow reuse churn by keeping play-intensity glow images in cache and reusing per-particle glow image specs across alpha changes.
 - Fixed GitHub Actions release checks on macOS runners that do not include `rg` by default.
+
+Release note: this build is published as a warning-expected DMG preview. It remains an unsigned/ad-hoc prerelease where Gatekeeper bypass prompts are expected on other Macs.
 
 ## 1.0.1 - 2026-05-28
 

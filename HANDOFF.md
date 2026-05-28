@@ -4,9 +4,10 @@
 - Hazakura Wallpaper now has a native Swift/AppKit implementation alongside the legacy Tauri reference.
 - The Swift app builds as a menu-bar-only macOS app with transparent multi-display overlays and CoreGraphics particle rendering.
 - `SakuraSky.xcodeproj` is now the primary distributable app build path; SwiftPM remains useful for fast tests and renderer smoke checks.
-- Latest generated unsigned ZIP candidate is `dist/Hazakura Wallpaper.zip` with SHA-256 `eae952068e83125d55639569e5919ba03bcf2f688e0e6eca15b674a88944b967`; share readiness is still intentionally blocked on normal-session evidence.
+- Latest generated unsigned `v1.0.2` preview artifacts are `dist/Hazakura Wallpaper.zip` with SHA-256 `f5ef45108fd40a028fee747991a255bbe179f069804671b2773e06dd5086f47d` and `dist/Hazakura Wallpaper.dmg` with SHA-256 `d746503f72f270e858dc0f3907f6a24f5dc159e261cdca557369b247ec19d3d7`; share readiness is intentionally blocked on normal-session evidence.
 
 ## Recent Changes
+- Prepared `v1.0.2` / build `3` as a warning-expected DMG preview: ad-hoc signed, not notarized, and expected to show Gatekeeper bypass prompts on other Macs.
 - Reduced Magic/Hotaru layer-backed compositor contents churn by tracking the last `CGImage` assigned to each reused glow sprite layer and only updating `contents` when that image changes.
 - Reduced Magic glow reuse churn by raising the glow image cache to cover play-intensity Magic frames and reusing per-particle glow image specs across twinkle alpha changes.
 - Reduced Magic/Hotaru layer-backed compositor work by avoiding a redundant hide/apply cycle on glow-backed frames while still hiding stale glow layers for paused and CoreGraphics fallback renders.
@@ -153,6 +154,10 @@
 - Treat macOS Reduce Motion as a runtime accessibility constraint; do not overwrite the user's saved intensity just because reduced motion is enabled.
 
 ## Tests
+- `npm run release:candidate --silent` passed for `v1.0.2` / build `3`, including Swift tests, Xcode app build, release verification, ZIP packaging, release evidence consistency, guard tests, and extracted ZIP app verification. Xcode emitted CoreSimulator out-of-date warnings, but the macOS app build and release evidence completed.
+- `HAZAKURA_WALLPAPER_PACKAGE_EXISTING_APP=1 ./scripts/package_dmg.sh` passed and generated `dist/Hazakura Wallpaper.dmg`.
+- `./scripts/check_publish_readiness.sh` passed for unsigned GitHub/DMG distribution and reported the expected Gatekeeper bypass note.
+- `./scripts/check_share_readiness.sh` failed as expected for the preview because normal-session bundle-open, human visual QA, and leaks memory evidence have not been recorded for this artifact.
 - `swift test --disable-sandbox` and `npm run renderer:tune -- --full` passed after Magic glow image reuse; renderer memory smoke rendered 300 frames at 320x180 with max RSS 26820608 bytes under 268435456.
 - `swift build` passed.
 - `swift build -c release` passed.
@@ -419,11 +424,11 @@
 - Runtime rendering now has a GPU-adjacent CALayer compositor for glow-heavy `Magic` and `Hotaru`: `SakuraScene.updateAndDrawLayerBacked` draws only the backdrop through CoreGraphics and returns glow sprites for layer composition, while offscreen previews/tests keep the CoreGraphics fallback. `SakuraCanvasView` owns the CALayer sprite pool and hides it for unsupported modes, pause, and fallback rendering. Swift Testing now guards that the layer-backed path is limited to glow-heavy modes. Verification passed: `swift test` (46 tests), `./scripts/render_previews.sh`, `./scripts/check_preview_artifacts.sh`, `./scripts/check_preview_determinism.sh`, `./scripts/check_renderer_memory_smoke.sh` (300 frames, max RSS 22659072 bytes under 268435456), `./scripts/build_app.sh`, `npm run verify --silent`, and `git diff --check`.
 
 ## Risks / Unknowns
-- LaunchServices bundle-open now passes for the current unsigned candidate and is recorded in `dist/release-evidence/unsigned-bundle-open-verified.txt`; if the app or ZIP is rebuilt, repeat that evidence because artifact identity is SHA/CDHash-bound.
-- Visual QA was accepted from generated preview matrices and automated menu/rendering coverage; a separate owner-operated manual pass on the target display setup is still useful before a wider announcement.
+- `v1.0.2` is a warning-expected DMG preview, not a frictionless public download. Normal-session bundle-open, human visual QA, and `leaks --atExit` evidence are not recorded for this artifact.
+- Generated preview matrices and automated menu/rendering coverage passed through the release candidate gate; a separate owner-operated manual pass on the target display setup is still useful before a wider announcement.
 - Public distribution is intentionally allowed as unsigned/ad-hoc ZIP or DMG with documented Gatekeeper bypass. Developer ID signing/notarization is optional for frictionless distribution.
 - `HAZAKURA_WALLPAPER_REQUIRE_NOTARIZATION=1 ./scripts/check_publish_readiness.sh` is the strict gate to enforce Developer ID signing, notarization, live stapler / Gatekeeper validation, final ZIP verification, matching `bundle-open-verified.txt`, and matching `visual-qa-accepted.txt` evidence. The legacy `SAKURA_SKY_REQUIRE_NOTARIZATION=1` alias is still accepted.
-- DMG creation can fail in this automation shell with `hdiutil: create failed - 装置が構成されていません`; use ZIP packaging here and validate DMG creation in a normal macOS session.
+- DMG creation passed for the current `v1.0.2` artifact, but future DMG/share evidence should still be repeated in a normal macOS session if the app or archive is rebuilt.
 - `./scripts/record_unsigned_memory_check.sh --operator "Codex"` could not attach in this automation shell (`Couldn't get task port ... immediately after launch`), so canonical memory evidence was not written and Instruments/leaks memory validation remains a normal-session check.
 - The Swift particle renderer is a faithful native approximation, not a pixel-identical port of the canvas implementation.
 - `SakuraOverlayWindow` still uses `.screenSaver` level intentionally for the current "frontmost decorative overlay" behavior; revisit only if product expectations shift toward a quieter desktop-background layer.
