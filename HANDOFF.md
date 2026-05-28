@@ -152,6 +152,7 @@
 - Treat macOS Reduce Motion as a runtime accessibility constraint; do not overwrite the user's saved intensity just because reduced motion is enabled.
 
 ## Tests
+- `swift test --disable-sandbox` and `npm run renderer:tune -- --full` passed after Magic glow image reuse; renderer memory smoke rendered 300 frames at 320x180 with max RSS 26820608 bytes under 268435456.
 - `swift build` passed.
 - `swift build -c release` passed.
 - `swift test --disable-sandbox` passed with 47 tests covering core settings persistence, reduce-motion rendering intensity and timer cadence, settings load-source reporting, legacy settings-file import priority, partially invalid night-background migration, legacy settings compatibility, menu behavior, About metadata, public lab-site URL metadata, smoke-exit configuration, overlay timing cadence, overlay window geometry, pointer wind/velocity policy, deterministic preview seeding and nested seed restoration, first-render density after resize, legacy orbit timing, and renderer smoke.
