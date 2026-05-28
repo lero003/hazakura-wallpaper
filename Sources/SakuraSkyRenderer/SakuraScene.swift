@@ -699,7 +699,7 @@ private struct Firefly {
             RGBAColor(122, 214, 112, 0).cgColor
         ],
         locations: [0, 0.45, 1]
-    )!
+    )
     private static let innerGlowSpec = SakuraGlowImageSpec(
         colors: [
             RGBAColor(255, 250, 178, 1).cgColor,
@@ -707,7 +707,7 @@ private struct Firefly {
             RGBAColor(204, 245, 105, 0).cgColor
         ],
         locations: [0, 0.58, 1]
-    )!
+    )
 
     var x: CGFloat = 0
     var y: CGFloat = 0
@@ -776,19 +776,21 @@ private struct Firefly {
         let drawSize = size * settings.intensity.sizeScale
         let point = CGPoint(x: x, y: y)
 
-        if let outer = makeGlowLayerSprite(
+        if let outerGlowSpec = Self.outerGlowSpec,
+           let outer = makeGlowLayerSprite(
             center: point,
             radius: drawSize * 7.2,
             opacity: 0.28 * drawAlpha,
-            spec: Self.outerGlowSpec
+            spec: outerGlowSpec
         ) {
             body(outer)
         }
-        if let inner = makeGlowLayerSprite(
+        if let innerGlowSpec = Self.innerGlowSpec,
+           let inner = makeGlowLayerSprite(
             center: point,
             radius: drawSize * 2.1,
             opacity: 0.76 * drawAlpha,
-            spec: Self.innerGlowSpec
+            spec: innerGlowSpec
         ) {
             body(inner)
         }

@@ -1,6 +1,6 @@
 {
   "name": "hazakura-wallpaper",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Native macOS desktop overlay with drifting sakura effects",
   "scripts": {
     "build": "./scripts/build_app.sh",

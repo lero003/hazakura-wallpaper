@@ -4,6 +4,10 @@ All notable changes to Hazakura Wallpaper are recorded here.
 
 ## Unreleased
 
+No unreleased changes.
+
+## 1.0.1 - 2026-05-28
+
 - Reduced Magic/Hotaru layer-backed compositor work by avoiding a redundant hide/apply cycle on glow-backed frames.
 - Reduced Hotaru glow sprite setup overhead by reusing fixed normalized glow image specs across opacity changes.
 - Reduced Spark ray cache hit overhead by replacing per-frame string cache keys with structured exact-dimension keys.
@@ -12,10 +16,12 @@ All notable changes to Hazakura Wallpaper are recorded here.
 - Reduced Magic and Hotaru glow sprite construction overhead by appending layer sprites into the existing frame buffer instead of creating per-particle temporary arrays.
 - Cached Spark ray paths so repeated frames reuse immutable CoreGraphics paths without reducing Spark density or changing settings behavior.
 - Added a renderer tuning loop for glow/particle changes that runs tests, deterministic previews, preview artifact checks, renderer memory smoke, optional app build, and whitespace validation from one command.
-- Pending normal-session release evidence before handing a DMG/ZIP to users:
-  DMG creation, LaunchServices bundle-open verification, `leaks --atExit`, and human visual QA acceptance.
 
-## 1.0.0 - Pending
+## 1.0.0 - 2026-05-26
+
+- Initial public release for normal-session unsigned DMG/ZIP distribution.
+- Completed normal-session release evidence before handing the DMG/ZIP to users:
+  DMG creation, LaunchServices bundle-open verification, `leaks --atExit`, and human visual QA acceptance.
 
 - Rebuilt the former Sakura Sky / Tauri desktop overlay as a native Swift/AppKit menu-bar app.
 - Renamed the public product to Hazakura Wallpaper and package surface to `hazakura-wallpaper`.
