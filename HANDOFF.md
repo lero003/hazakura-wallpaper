@@ -7,6 +7,7 @@
 - Latest generated unsigned ZIP candidate is `dist/Hazakura Wallpaper.zip` with SHA-256 `eae952068e83125d55639569e5919ba03bcf2f688e0e6eca15b674a88944b967`; share readiness is still intentionally blocked on normal-session evidence.
 
 ## Recent Changes
+- Reduced Magic/Hotaru layer-backed compositor contents churn by tracking the last `CGImage` assigned to each reused glow sprite layer and only updating `contents` when that image changes.
 - Reduced Magic glow reuse churn by raising the glow image cache to cover play-intensity Magic frames and reusing per-particle glow image specs across twinkle alpha changes.
 - Reduced Magic/Hotaru layer-backed compositor work by avoiding a redundant hide/apply cycle on glow-backed frames while still hiding stale glow layers for paused and CoreGraphics fallback renders.
 - Reduced Hotaru glow sprite setup overhead by reusing fixed normalized glow image specs across opacity changes, avoiding per-particle color-stop construction while preserving glow image output.

@@ -187,6 +187,7 @@ final class SakuraCanvasView: NSView {
 private final class GlowLayerCompositor {
     private let containerLayer = CALayer()
     private var spriteLayers: [CALayer] = []
+    private var spriteLayerImages: [CGImage?] = []
     private weak var hostLayer: CALayer?
 
     init() {
@@ -223,6 +224,7 @@ private final class GlowLayerCompositor {
         while spriteLayers.count < sprites.count {
             let layer = makeSpriteLayer()
             spriteLayers.append(layer)
+            spriteLayerImages.append(nil)
             containerLayer.addSublayer(layer)
         }
 
@@ -233,7 +235,10 @@ private final class GlowLayerCompositor {
             layer.frame = sprite.frame
             layer.opacity = Float(sprite.opacity)
             layer.contentsScale = contentsScale
-            layer.contents = sprite.image
+            if spriteLayerImages[index].map({ $0 !== sprite.image }) ?? true {
+                layer.contents = sprite.image
+                spriteLayerImages[index] = sprite.image
+            }
         }
 
         if sprites.count < spriteLayers.count {
@@ -254,6 +259,9 @@ private final class GlowLayerCompositor {
 
     func removeFromSuperlayer() {
         containerLayer.removeFromSuperlayer()
+        for index in spriteLayerImages.indices {
+            spriteLayerImages[index] = nil
+        }
         hostLayer = nil
     }
 
