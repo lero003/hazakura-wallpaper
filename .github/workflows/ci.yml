@@ -32,6 +32,12 @@ jobs:
           swift --version
           npm --version
 
+      - name: Install release check tools
+        run: |
+          if ! command -v rg >/dev/null 2>&1; then
+            brew install ripgrep
+          fi
+
       - name: Check scripts and public source hygiene
         run: |
           bash -n scripts/*.sh script/build_and_run.sh
