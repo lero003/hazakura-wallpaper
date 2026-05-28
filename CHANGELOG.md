@@ -4,6 +4,7 @@ All notable changes to Hazakura Wallpaper are recorded here.
 
 ## Unreleased
 
+- Added the MIT License to clarify reuse, modification, and redistribution terms.
 - Reduced Magic glow reuse churn by keeping play-intensity glow images in cache and reusing per-particle glow image specs across alpha changes.
 - Fixed GitHub Actions release checks on macOS runners that do not include `rg` by default.
 

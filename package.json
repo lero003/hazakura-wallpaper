@@ -2,6 +2,7 @@
   "name": "hazakura-wallpaper",
   "version": "1.0.1",
   "description": "Native macOS desktop overlay with drifting sakura effects",
+  "license": "MIT",
   "scripts": {
     "build": "./scripts/build_app.sh",
     "dev": "./script/build_and_run.sh",

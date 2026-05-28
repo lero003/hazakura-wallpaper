@@ -41,6 +41,7 @@ require_absent() {
 }
 
 require_file README.md
+require_file LICENSE
 require_file CHANGELOG.md
 require_file CONTRIBUTING.md
 require_file SECURITY.md
@@ -75,7 +76,9 @@ require_contains README.md "npm run share:preflight:strict"
 require_no_exact_line README.md "npm run share:preflight"
 require_contains README.md "./scripts/check_share_readiness.sh"
 require_contains README.md "does not rebuild the app or ZIP"
-require_contains README.md "No open-source license has been selected yet."
+require_contains README.md "MIT License"
+require_contains LICENSE "MIT License"
+require_contains LICENSE "Copyright (c) 2026 Hazakura Lab"
 require_absent README.md "Sakura Sky"
 
 require_contains CHANGELOG.md "## Unreleased"

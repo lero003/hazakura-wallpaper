@@ -256,4 +256,4 @@ Developed by 葉桜ラボ / Hazakura Lab.
 
 ## License
 
-No open-source license has been selected yet. Until a `LICENSE` file is added, treat the source and bundled assets as all rights reserved.
+Hazakura Wallpaper is available under the MIT License. See `LICENSE`.
